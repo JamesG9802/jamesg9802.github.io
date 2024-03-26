@@ -1,0 +1,11 @@
+.Touchable-Container {
+    display: block;
+    position: relative;
+    margin: 0px;
+    padding: 0px;
+    transition: background-color ease-in-out .15s;
+    border-radius: 1000px;
+}
+.Touchable-Container:hover {
+    @apply bg-l_onBackground-100/5 dark:bg-d_onBackground-100/5;
+}
