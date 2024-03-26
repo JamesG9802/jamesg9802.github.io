@@ -1,0 +1,9 @@
+#footer {
+    @apply bg-l_primary-100 dark:bg-d_primary-100;
+    @apply flex-grow-0;
+    @apply py-6;
+    position: absolute;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+}
