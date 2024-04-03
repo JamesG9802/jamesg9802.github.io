@@ -1,15 +1,15 @@
 import AppHeader from "components/AppHeader";
-import Canvas from "components/Generic/Canvas";
 import AppFooter from "components/AppFooter";
+import Home from "Screens/Home";
 
 import "App.css";
 
 function App() {
   return (
-    <div id="content" className="flex flex-col">
-      <AppHeader/>
-      <div className="flex-grow">
-        <Canvas/>
+    <div id="page" className="flex flex-col">
+      <div id="content" className="flex flex-col flex-grow">
+        <AppHeader/>
+        <Home/>
       </div>
       <AppFooter/>
     </div>
