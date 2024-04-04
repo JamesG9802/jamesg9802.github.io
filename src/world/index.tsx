@@ -1,10 +1,10 @@
 import { Engine } from "engine";
 import { Camera } from "./camera"
 import { Entity } from "./entity"
-
-
+import { vec3 } from "wgpu-matrix";
 
 export class World {
+    test: number = 0;
     main_camera: Camera;
     entities: Entity[];
 
@@ -18,7 +18,7 @@ export class World {
      */
     render(engine: Engine) {
         for(let i = 0; i < this.entities.length; i++) {
-            this.entities[i].render(engine);
+            this.entities[i].render(engine, this);
         }
     }
 }

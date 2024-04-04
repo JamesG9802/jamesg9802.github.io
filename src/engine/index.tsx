@@ -1,6 +1,5 @@
 import { ModelPipeline } from "../world/model";
 
-
 export class Engine {
     adapter: GPUAdapter;
     device: GPUDevice;
@@ -37,7 +36,7 @@ export class Engine {
         });
     
         //  Create the pipeline responsible for rendering models.
-        const model_pipeline: ModelPipeline = new ModelPipeline(device, canvasFormat);
+        const model_pipeline: ModelPipeline = new ModelPipeline(device, context, canvasFormat);
         
         let engine: Engine = new Engine(
             adapter,
@@ -46,5 +45,12 @@ export class Engine {
             model_pipeline
         );
         return engine;
+    }
+
+    /**
+     * Upon canvas resizing, resize the pipelines. 
+     */
+    resize() {
+        this.model_pipeline.resize(this.device, this.context);
     }
 }

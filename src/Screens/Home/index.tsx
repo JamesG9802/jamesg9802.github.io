@@ -36,6 +36,42 @@ export default function Home() {
             animate();
         }
         initialize();
+        function input(event: KeyboardEvent) {
+            if(simulation.current == undefined) return;
+            if (event.key == "ArrowLeft") {
+                simulation.current.left_pressed = true;
+            }
+            if (event.key == "ArrowRight") {
+                simulation.current.right_pressed = true;
+            }
+            if (event.key == "ArrowUp") {
+                simulation.current.up_pressed = true;
+            }
+            if (event.key == "ArrowDown") {
+                simulation.current.down_pressed = true;
+            }
+            if (event.key == "q") {
+                simulation.current.left_rotate_pressed = true;
+            }
+            if (event.key == "e") {
+                simulation.current.right_rotate_pressed = true;
+            }
+        }
+        function letgo(event: KeyboardEvent) {
+            if(simulation.current == undefined) return;
+            simulation.current.left_pressed = false;
+            simulation.current.right_pressed = false;
+            simulation.current.up_pressed = false;
+            simulation.current.down_pressed = false;
+            simulation.current.left_rotate_pressed = false;
+            simulation.current.right_rotate_pressed = false;
+        }
+        window.addEventListener("keydown", input);
+        window.addEventListener("keyup", letgo);
+        return () => {
+            window.removeEventListener("keydown", input);
+            window.removeEventListener("keyup", letgo);
+        }
     }, []);
 
     /** On initialization and size change, update the canvas size. */
@@ -46,6 +82,9 @@ export default function Home() {
                 return;
             canvas_ref.current.width = rect.width;
             canvas_ref.current.height = rect.height;
+            if(simulation.current) {
+                simulation.current.resize();
+            }
         }
     }, [canvas_ref, width, height]);
 
