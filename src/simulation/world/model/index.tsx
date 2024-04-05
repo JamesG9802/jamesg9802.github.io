@@ -1,3 +1,4 @@
+import { Engine } from "simulation/engine";
 import { ModelPipeline } from "./pipeline";
 import { Mesh, MeshBuffer } from "simulation/world/mesh";
 import { Mat4, vec3 } from "wgpu-matrix";
@@ -7,10 +8,9 @@ import { Mat4, vec3 } from "wgpu-matrix";
  */
 export type ModelUniform = {
     model_view: Mat4,
-    projection: Mat4,
     normal_matrix: Mat4,
 }
-export let model_uniform_bytelength: number = 192;
+export let model_uniform_bytelength: number = 128;
 
 /**
  * The model of an entity. DO NOT SHARE MODELS BETWEEN ENTITIES. IT IS EXPECTED FOR A MODEL TO BE USED BY A SINGLE ENTITY.
@@ -33,25 +33,25 @@ export class Model {
      */
     bind_group: GPUBindGroup;
 
-    constructor(device: GPUDevice, model_pipeline: ModelPipeline, mesh: Mesh, model_name: string) {
+    constructor(engine: Engine, mesh: Mesh, model_name: string) {
         this.mesh = mesh;
-        this.uniform_buffer = device.createBuffer({
+        this.uniform_buffer = engine.device.createBuffer({
             label: model_name + "'s uniform buffer",
             size: model_uniform_bytelength,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
             mappedAtCreation: false
         });
-        this.bind_group = device.createBindGroup({
+        this.bind_group = engine.device.createBindGroup({
             label: "Renderer bind group",
-            layout: model_pipeline.bind_group_layout,
+            layout: engine.bind_group_layouts.model_bind_group_layout[1],
             entries: [{
                 binding: 0,
                 resource: {buffer: this.uniform_buffer}
             }]
-        })
+        });
     }
 
-    static async load_from_file(device: GPUDevice, model_pipeline: ModelPipeline, mesh_name: string
+    static async load_from_file(engine: Engine, mesh_name: string
         ): Promise<Model | undefined> {
         //  Mesh does not exist
         if(!(mesh_name in Mesh.mesh_list)) {
@@ -139,12 +139,12 @@ export class Model {
                     mesh_normals.push(normal_vector[2]);
                 }
 
-                let mesh_buffer = new MeshBuffer(device, mesh_name, mesh_vertices,
+                let mesh_buffer = new MeshBuffer(engine.device, mesh_name, mesh_vertices,
                     mesh_normals, mesh_texels, mesh_indices);
                 Mesh.allocated_meshes[mesh_name].data = mesh_buffer;
                 if(mesh_buffer != undefined) {   
                     Mesh.allocated_meshes[mesh_name].usage++;
-                    return new Model(device, model_pipeline, new Mesh(mesh_buffer), mesh_name);
+                    return new Model(engine, new Mesh(mesh_buffer), mesh_name);
                 }
                 else
                     return undefined;
@@ -154,7 +154,7 @@ export class Model {
                 let mesh_buffer = Mesh.allocated_meshes[mesh_name].data;
                 if(mesh_buffer != undefined) {
                     Mesh.allocated_meshes[mesh_name].usage++;
-                    return new Model(device, model_pipeline, new Mesh(mesh_buffer), mesh_name);
+                    return new Model(engine, new Mesh(mesh_buffer), mesh_name);
                 }
                 else {
                     console.error("The model is being used, but for some reason it does not exist.");
