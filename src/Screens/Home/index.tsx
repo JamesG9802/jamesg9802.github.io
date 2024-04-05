@@ -80,14 +80,13 @@ export default function Home() {
             let rect = canvas_ref.current?.parentElement?.getBoundingClientRect();
             if(rect == undefined) 
                 return;
-            canvas_ref.current.width = rect.width;
-            canvas_ref.current.height = rect.height;
+            canvas_ref.current.width = !simulation.current ? width : Math.max(1, Math.min(rect.width, simulation.current.engine.device.limits.maxTextureDimension2D));
+            canvas_ref.current.height = !simulation.current ? height : Math.max(1, Math.min(rect.height, simulation.current.engine.device.limits.maxTextureDimension2D));
             if(simulation.current) {
-                simulation.current.resize();
+                simulation.current.resize(canvas_ref.current.width, canvas_ref.current.height);
             }
         }
     }, [canvas_ref, width, height]);
-
     
     return (<>
       <div className="flex-grow relative">

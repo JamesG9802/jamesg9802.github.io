@@ -20,6 +20,7 @@ export class MeshBuffer {
 
     #normals_offset: number;
     #indices_offset: number;
+    #texels_offset: number;
 
     constructor(device: GPUDevice, mesh_name: string, vertices: number[], 
         normals: number[], texels: number[], indices: number[]
@@ -30,9 +31,10 @@ export class MeshBuffer {
         //  Normals and indices default to 0 before being set in `create_model_buffer`.
         this.#normals_offset = 0;
         this.#indices_offset = 0;
+        this.#texels_offset = 0;
 
         this.#buffer = this.#create_mesh_buffer(device, mesh_name, new Float32Array(vertices), 
-            new Float32Array(normals), new Uint32Array(indices));
+            new Float32Array(normals), new Uint32Array(indices), new Float32Array(texels));
     }
 
     #create_mesh_buffer(device: GPUDevice, 
@@ -40,10 +42,11 @@ export class MeshBuffer {
         vertices: Float32Array, 
         normals: Float32Array, 
         indices: Uint32Array,
+        texels: Float32Array,
     ): GPUBuffer {
         let mesh_buffer = device.createBuffer({
             label: mesh_name + "'s mesh buffer",
-            size: vertices.byteLength + normals.byteLength + indices.byteLength,
+            size: vertices.byteLength + normals.byteLength + indices.byteLength + texels.byteLength,
             usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST | 
                 GPUBufferUsage.INDEX | GPUBufferUsage.VERTEX,
             mappedAtCreation: false
@@ -55,6 +58,9 @@ export class MeshBuffer {
 
         this.#indices_offset = this.#normals_offset + normals.byteLength;
         device.queue.writeBuffer(mesh_buffer, this.#indices_offset, indices);
+
+        this.#texels_offset = this.#indices_offset + indices.byteLength;
+        device.queue.writeBuffer(mesh_buffer, this.#texels_offset, texels);
         return mesh_buffer;
     }
 
@@ -90,8 +96,20 @@ export class MeshBuffer {
         return {
             buffer: this.#buffer,
             offset: this.#indices_offset,
-            size: this.#buffer.size - this.#indices_offset
+            size: this.#texels_offset - this.#indices_offset
         };
+    }
+
+    /**
+     * Get the correct spacing into ModelBuffer for texels.
+     * @returns
+     */
+    get_texels_buffer(): { buffer: GPUBuffer, offset: number, size: number} {
+        return {
+            buffer: this.#buffer,
+            offset: this.#texels_offset,
+            size: this.#buffer.size - this.#texels_offset
+        }
     }
     
     destroy() {

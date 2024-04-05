@@ -51,21 +51,21 @@ export class Eye {
 
     /**
      * Sets the new target position for the camera
-     * @param new_target the new target position
+     * @param new_forward the new target position
      */
-    set_target(new_target: Vec3) {
-        this.forward = new_target;
+    set_forward(new_forward: Vec3) {
+        this.forward = new_forward;
         this.#compute_view_matrix();
     }
 
     /**
      * Sets the new position and target position for the camera
      * @param new_position the camera's new position
-     * @param new_target the new target position
+     * @param new_forward the new target position
      */
-    set_position_and_target(new_position: Vec3, new_target: Vec3) {
+    set_position_and_forward(new_position: Vec3, new_forward: Vec3) {
         this.position = new_position;
-        this.forward = new_target;
+        this.forward = new_forward;
         this.#compute_view_matrix();
     }
 }

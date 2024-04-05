@@ -1,4 +1,4 @@
-import { ModelPipeline } from "../world/model";
+import { ModelPipeline } from "simulation/world/model";
 
 export class Engine {
     adapter: GPUAdapter;
