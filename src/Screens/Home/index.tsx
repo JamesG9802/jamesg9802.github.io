@@ -21,8 +21,10 @@ export default function Home() {
     }
 
     function animate() {
-        if(simulation.current != undefined)
+        if(simulation.current != undefined){
+            simulation.current.update();
             simulation.current.render();
+        }
         requestAnimationFrame(animate);
     }
 
