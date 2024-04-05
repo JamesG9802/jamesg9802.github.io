@@ -1,5 +1,5 @@
 import { ModelPipeline } from "./pipeline";
-import { Mesh, MeshBuffer } from "world/mesh";
+import { Mesh, MeshBuffer } from "simulation/world/mesh";
 import { Mat4, vec3 } from "wgpu-matrix";
 
 /**
@@ -8,11 +8,14 @@ import { Mat4, vec3 } from "wgpu-matrix";
 export type ModelUniform = {
     model_view: Mat4,
     projection: Mat4,
+    normal_matrix: Mat4,
 }
-export let model_uniform_bytelength: number = 128;
+export let model_uniform_bytelength: number = 192;
 
 /**
  * The model of an entity. DO NOT SHARE MODELS BETWEEN ENTITIES. IT IS EXPECTED FOR A MODEL TO BE USED BY A SINGLE ENTITY.
+ * If you get a model through `load_from_file`, only one entity should use it. However, you can load multiple copies of 
+ * the same model through `load_from_file`.
  */
 export class Model {
     /**
@@ -159,14 +162,6 @@ export class Model {
                 }
             }
         }
-    }
-
-    /**
-     * Sets the model matrix of the model (position, rotation, scale) to the uniform buffer.
-     * @param matrix 
-     */
-    set_model_matrix(device:GPUDevice, matrix: Mat4) {
-        device.queue.writeBuffer(this.uniform_buffer, 0, new Float32Array(matrix));
     }
 
     /**
