@@ -141,9 +141,12 @@ export class Mesh {
         usage: number 
     }};
 
+    name: string;
+
     mesh_buffer: MeshBuffer;
 
-    constructor(mesh_buffer: MeshBuffer) {
+    constructor(name: string, mesh_buffer: MeshBuffer) {
+        this.name = name;
         this.mesh_buffer = mesh_buffer;
     }
 
