@@ -59,7 +59,7 @@ export class Simulation {
         
         let entities: Entity[] = [e1, e2];
 
-        for(let i = 0; i < 1000; i++) {
+        for(let i = 0; i < 2000; i++) {
             let model = await Model.load_from_file(engine, Math.random() > 5 ? "cube" : "cliff");
             if(!model) continue;
             let angle = Math.random() * 2 * Math.PI;

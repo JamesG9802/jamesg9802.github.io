@@ -92,7 +92,7 @@ export class Entity {
      * Renders this entity to the engine's model pipeline.
      * @param engine 
      */
-    render(engine: Engine, world: World, first: boolean) {
+    render(engine: Engine, world: World) {
     //    this.position[1] = 2*Math.sin(this.rotation[3])
     //    quat.rotateX(this.rotation, Math.PI / 200, this.rotation);
     //    quat.rotateY(this.rotation, Math.PI / 400, this.rotation);
@@ -106,7 +106,7 @@ export class Entity {
             this.#update_uniform(engine.device, world);
             this.#transform_changed = false;
         }
-        engine.model_pipeline.render(engine, world, this.model, first);
+        engine.model_pipeline.render(world, this.model);
     }
 
     destroy() {

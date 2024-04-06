@@ -24,7 +24,7 @@ export class Model {
     mesh: Mesh;
 
     /**
-     * Buffer containing the model's uniform data.
+     * Buffer containing the model's uniform data (projection, modelview, etc.).
      */
     uniform_buffer: GPUBuffer;
 
@@ -144,7 +144,7 @@ export class Model {
                 Mesh.allocated_meshes[mesh_name].data = mesh_buffer;
                 if(mesh_buffer != undefined) {   
                     Mesh.allocated_meshes[mesh_name].usage++;
-                    return new Model(engine, new Mesh(mesh_buffer), mesh_name);
+                    return new Model(engine, new Mesh(mesh_name, mesh_buffer), mesh_name);
                 }
                 else
                     return undefined;
@@ -154,7 +154,7 @@ export class Model {
                 let mesh_buffer = Mesh.allocated_meshes[mesh_name].data;
                 if(mesh_buffer != undefined) {
                     Mesh.allocated_meshes[mesh_name].usage++;
-                    return new Model(engine, new Mesh(mesh_buffer), mesh_name);
+                    return new Model(engine, new Mesh(mesh_name, mesh_buffer), mesh_name);
                 }
                 else {
                     console.error("The model is being used, but for some reason it does not exist.");

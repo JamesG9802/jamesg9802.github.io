@@ -6,16 +6,20 @@ import { World } from "simulation/world";
  * Render pipeline specifically for rendering models.
  */
 export class ModelPipeline {
+    /**
+     * Current command encoder for the rendering.
+     */
+    #command_encoder: GPUCommandEncoder | undefined; 
+
+    /**
+     * Current render pass for the command encoder.
+     */
+    #render_pass: GPURenderPassEncoder | undefined;
 
     /**
      * Render pipeline for models.
      */
     pipeline: GPURenderPipeline;
-    
-    /**
-     * Current command encoder for the render pass.
-     */
-    command_encoder: GPUCommandEncoder | undefined; 
 
     /**
      * The depth texture for the model pipeline. 
@@ -161,11 +165,26 @@ export class ModelPipeline {
     }
 
     /**
-     * Creates a command encoder for all render passes to be sent to.
+     * Creates a command encoder for the render pass to be sent to.
      * @param device 
      */
-    begin_render_command(device: GPUDevice) {
-        this.command_encoder = device.createCommandEncoder();
+    begin_render_command(device: GPUDevice, context: GPUCanvasContext) {
+        this.#command_encoder = device.createCommandEncoder();
+        this.#render_pass = this.#command_encoder.beginRenderPass({
+            colorAttachments: [{
+                view: context.getCurrentTexture().createView(),
+                loadOp: "clear",
+                storeOp: "store",
+                clearValue: { r: 0, g: 0, b: 0, a: 1 }
+            }],
+            depthStencilAttachment: {
+                view: this.depth_texture.createView(),
+                depthClearValue: 1.0,
+                depthLoadOp: "clear",
+                depthStoreOp: "store",
+            }
+        });
+        this.#render_pass.setPipeline(this.pipeline);
     }
 
     /**
@@ -173,8 +192,10 @@ export class ModelPipeline {
      * @param device 
      */
     end_render_command(device: GPUDevice) {
-        if(this.command_encoder)
-            device.queue.submit([this.command_encoder.finish()]);
+        if(this.#command_encoder && this.#render_pass) {
+            this.#render_pass.end();
+            device.queue.submit([this.#command_encoder.finish()]);
+        }
     }
 
     /**
@@ -182,43 +203,28 @@ export class ModelPipeline {
      * @param engine 
      * @param model 
      */
-    render(engine: Engine, world: World, model: Model, first: boolean) {
-        if(!this.command_encoder) 
+    render(world: World, model: Model) {
+        if(!this.#command_encoder || !this.#render_pass) 
             return;
-        const pass = this.command_encoder.beginRenderPass({
-            colorAttachments: [{
-                view: engine.context.getCurrentTexture().createView(),
-                loadOp: first ? "clear" : "load",
-                storeOp: "store",
-                clearValue: { r: 0, g: 0, b: 0, a: 1 }
-            }],
-            depthStencilAttachment: {
-                view: this.depth_texture.createView(),
-                depthClearValue: 1.0,
-                depthLoadOp: first ? "clear" : "load",
-                depthStoreOp: "store",
-            }
-        });
-        pass.setPipeline(this.pipeline);
-
+        
         //  The first binding group is for the camera's projection matrix.
-        pass.setBindGroup(0, world.main_camera.projection_bind_group);
+        this.#render_pass.setBindGroup(0, world.main_camera.projection_bind_group);
         //  The second binding group is for the modelview and normal matries. 
-        pass.setBindGroup(1, model.bind_group);
+        this.#render_pass.setBindGroup(1, model.bind_group);
 
         let vertices = model.mesh.mesh_buffer.get_vertices_buffer();
-        pass.setVertexBuffer(0, vertices.buffer, vertices.offset, vertices.size);
+        this.#render_pass.setVertexBuffer(0, vertices.buffer, vertices.offset, vertices.size);
 
         let normals = model.mesh.mesh_buffer.get_normals_buffer();
-        pass.setVertexBuffer(1, normals.buffer, normals.offset, normals.size);
+        this.#render_pass.setVertexBuffer(1, normals.buffer, normals.offset, normals.size);
 
         let texels = model.mesh.mesh_buffer.get_texels_buffer();
-        pass.setVertexBuffer(2, texels.buffer, texels.offset, texels.size);
+        this.#render_pass.setVertexBuffer(2, texels.buffer, texels.offset, texels.size);
 
         let indices = model.mesh.mesh_buffer.get_indices_buffer();
-        pass.setIndexBuffer(indices.buffer, "uint32", indices.offset, indices.size);
+        this.#render_pass.setIndexBuffer(indices.buffer, "uint32", indices.offset, indices.size);
 
-        pass.drawIndexed(model.mesh.mesh_buffer.vertices_count);
-        pass.end();
+        this.#render_pass.drawIndexed(model.mesh.mesh_buffer.vertices_count);
+        //this.#render_pass.drawIndexedIndirect(model.mesh.mesh_buffer.indirect_params, 0);
     }
 }
