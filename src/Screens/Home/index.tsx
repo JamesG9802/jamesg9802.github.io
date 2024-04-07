@@ -5,6 +5,9 @@ export default function Home() {
     const canvas_ref = useRef<HTMLCanvasElement | null>(null);
     const [width, height] = useWindowSize();
     const simulation = useRef<Simulation>();
+    //  Only used when the simulation first initializes to get the proper canvas height
+    //  afterwards the resizer will properly handle the size
+    const canvas_width = useRef<number>(1), canvas_height = useRef<number>(1);
 
     /*  https://stackoverflow.com/a/19014495    to update canvas size on document size change. */
     function useWindowSize() {
@@ -35,6 +38,8 @@ export default function Home() {
                 throw Error("Canvas could not be found.");
             let new_simulation = await Simulation.create(canvas_ref.current);
             simulation.current = new_simulation;
+            if(simulation.current)
+                simulation.current.resize(canvas_width.current, canvas_height.current);
             animate();
         }
         initialize();
@@ -82,10 +87,14 @@ export default function Home() {
             let rect = canvas_ref.current?.parentElement?.getBoundingClientRect();
             if(rect == undefined) 
                 return;
-            canvas_ref.current.width = !simulation.current ? width : Math.max(1, Math.min(rect.width, simulation.current.engine.device.limits.maxTextureDimension2D));
-            canvas_ref.current.height = !simulation.current ? height : Math.max(1, Math.min(rect.height, simulation.current.engine.device.limits.maxTextureDimension2D));
+            canvas_ref.current.width = !simulation.current ? rect.width : Math.max(1, Math.min(rect.width, simulation.current.engine.device.limits.maxTextureDimension2D));
+            canvas_ref.current.height = !simulation.current ? rect.height : Math.max(1, Math.min(rect.height, simulation.current.engine.device.limits.maxTextureDimension2D));
             if(simulation.current) {
                 simulation.current.resize(canvas_ref.current.width, canvas_ref.current.height);
+            }
+            else {
+                canvas_width.current = canvas_ref.current.width;
+                canvas_height.current = canvas_ref.current.height;
             }
         }
     }, [canvas_ref, width, height]);
