@@ -2,6 +2,9 @@ import { Engine } from "simulation/engine";
 import { Model } from "simulation/world/model";
 import { World } from "simulation/world";
 
+// (1 and 4 are currently the only possible values.)
+const multi_sample_count = 4;
+
 /**
  * Render pipeline specifically for rendering models.
  */
@@ -25,6 +28,16 @@ export class ModelPipeline {
      * The depth texture for the model pipeline. 
      */
     depth_texture: GPUTexture;
+
+    /**
+     * The texture for multisampling for the model pipeline.
+     */
+    multisampling_texture: GPUTexture;
+
+    /**
+     * The view into the multisampling texture.
+     */
+    multisampling_view: GPUTextureView;
 
     /**
      * Creates a new Model Pipeline.
@@ -102,8 +115,18 @@ export class ModelPipeline {
         this.depth_texture = device.createTexture({
             size: [context.canvas.width, context.canvas.height],
             format: "depth24plus",
-            usage: GPUTextureUsage.RENDER_ATTACHMENT
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+            sampleCount: multi_sample_count
         });
+
+        //  Set up the multisampling texture
+        this.multisampling_texture = device.createTexture({
+            size: [context.canvas.width, context.canvas.height],
+            sampleCount: multi_sample_count,  
+            format: canvas_format,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        });
+        this.multisampling_view = this.multisampling_texture.createView();
 
         //  Set up the bind group for the uniform buffer
         const vertex_layout: GPUVertexBufferLayout[] = [
@@ -131,6 +154,7 @@ export class ModelPipeline {
         this.pipeline = device.createRenderPipeline({
             label: "Model pipeline",
             layout: model_pipeline_layout,
+            multisample: { count: multi_sample_count },
             vertex: {
                 module: shader,
                 entryPoint: "vertexMain",
@@ -160,8 +184,17 @@ export class ModelPipeline {
         this.depth_texture = device.createTexture({
             size: [context.canvas.width, context.canvas.height],
             format: "depth24plus",
-            usage: GPUTextureUsage.RENDER_ATTACHMENT
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+            sampleCount: multi_sample_count
         });
+        this.multisampling_texture.destroy();
+        this.multisampling_texture = device.createTexture({
+            size: [context.canvas.width, context.canvas.height],
+            sampleCount: multi_sample_count,  
+            format: navigator.gpu.getPreferredCanvasFormat(),
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        });
+        this.multisampling_view = this.multisampling_texture.createView();
     }
 
     /**
@@ -172,7 +205,8 @@ export class ModelPipeline {
         this.#command_encoder = device.createCommandEncoder();
         this.#render_pass = this.#command_encoder.beginRenderPass({
             colorAttachments: [{
-                view: context.getCurrentTexture().createView(),
+                view: this.multisampling_view,
+                resolveTarget: context.getCurrentTexture().createView(),
                 loadOp: "clear",
                 storeOp: "store",
                 clearValue: { r: 0, g: 0, b: 0, a: 1 }
