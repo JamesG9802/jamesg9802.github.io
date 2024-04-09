@@ -1,16 +1,17 @@
 import { Engine } from "simulation/engine";
-import { ModelPipeline } from "./pipeline";
-import { Mesh, MeshBuffer } from "simulation/world/mesh";
-import { Mat4, vec3 } from "wgpu-matrix";
+import { ModelPipeline } from "simulation/engine/pipelines/model";
+import { Mesh } from "simulation/world/mesh";
+import { Mat3, Mat4, } from "wgpu-matrix";
 
 /**
  * The type of data to be passed into the shader for rendering models
+ * (This is isn't actually used anywhere, this is just for reference)
  */
 export type ModelUniform = {
     model_view: Mat4,
-    normal_matrix: Mat4,
+    normal_matrix: Mat3,
 }
-export let model_uniform_bytelength: number = 128;
+export let model_uniform_bytelength: number = 112;
 
 /**
  * The model of an entity. DO NOT SHARE MODELS BETWEEN ENTITIES. IT IS EXPECTED FOR A MODEL TO BE USED BY A SINGLE ENTITY.
@@ -19,40 +20,71 @@ export let model_uniform_bytelength: number = 128;
  */
 export class Model {
     /**
+     * Whether or not the model is a unique model or an instance. 
+     * Instances all share the same mesh (so changing one affects everything else).
+     * Non-instances have their own mesh data.
+     * 
+     */
+    is_instance: boolean;
+    
+    instance_id: number;
+
+    /**
      * Buffer containing the model's vertices, normals, and indices
      */
     mesh: Mesh;
 
     /**
+     * Data where the uniform data is stored in.
+     */
+    uniform_data: Float32Array;
+
+    /**
      * Buffer containing the model's uniform data (projection, modelview, etc.).
      */
-    uniform_buffer: GPUBuffer;
+    uniform_buffer: GPUBuffer | undefined;
 
     /**
      * Bind group holding model resources.
      */
-    bind_group: GPUBindGroup;
+    bind_group: GPUBindGroup | undefined;
 
-    constructor(engine: Engine, mesh: Mesh, model_name: string) {
+    /**
+     * 
+     * @param engine 
+     * @param mesh 
+     * @param model_name 
+     * @param instance_id if the instance id == -1, then the model is an instance
+     */
+    constructor(engine: Engine, mesh: Mesh, model_name: string, instance_id: number = -1) {
         this.mesh = mesh;
-        this.uniform_buffer = engine.device.createBuffer({
-            label: model_name + "'s uniform buffer",
-            size: model_uniform_bytelength,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-            mappedAtCreation: false
-        });
-        this.bind_group = engine.device.createBindGroup({
-            label: "Renderer bind group",
-            layout: engine.bind_group_layouts.model_bind_group_layout[1],
-            entries: [{
-                binding: 0,
-                resource: {buffer: this.uniform_buffer}
-            }]
-        });
+        this.is_instance = instance_id != -1;
+        this.instance_id = instance_id;
+        //  4 bytes per float
+        this.uniform_data = new Float32Array(this.is_instance ? 0 : model_uniform_bytelength / 4 );
+        
+        //  Non instances are responsible for tracking their own uniform buffer.
+        if(!this.is_instance) {
+            this.uniform_buffer = engine.device.createBuffer({
+                label: model_name + "'s uniform buffer",
+                size: model_uniform_bytelength,
+                usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
+                mappedAtCreation: false
+            });
+            this.bind_group = engine.device.createBindGroup({
+                label: "Renderer bind group",
+                layout: engine.bind_group_layouts.model_bind_group_layout[1],
+                entries: [{
+                    binding: 0,
+                    resource: {buffer: this.uniform_buffer}
+                }]
+            });
+        }
     }
 
-    static async load_from_file(engine: Engine, mesh_name: string
-        ): Promise<Model | undefined> {
+    static async load_from_file(engine: Engine, mesh_name: string, 
+        is_instance: boolean = true
+    ): Promise<Model | undefined> {
         //  Mesh does not exist
         if(!(mesh_name in Mesh.mesh_list)) {
             console.error(`Mesh ${mesh_name} cannot be found.`);
@@ -60,107 +92,44 @@ export class Model {
         }
         //  Mesh does exist,
         else {
-            //  but this is the first time loading it.
-            if(Mesh.allocated_meshes[mesh_name].usage <= 0) {  
+            //  but this is either the first time loading it OR this is not an instance model
+            //  (which means that a new mesh must be fetched because there is no guarantees that
+            //  the existing mesh is unaltered from instances using it.
+            if(Mesh.allocated_meshes[mesh_name].usage <= 0 || !is_instance) {  
                 const obj_data: string[] = ((await Mesh.mesh_list[mesh_name]()) as any).default.split("\n");
-                let vertices: number[] = [];
-                let normals: number[] = [];
-                let texels: number[] = [];  //  not support atm
-                let faces: string[] = [];
-
-                //  For each line
-                for(let line = 0; line < obj_data.length; line++) {
-                    //  Split up data by spaces
-                    const data = obj_data[line].split(" ");
-                    if(data.length <= 1)
-                        continue;
-                    const identifier = data[0];
-                    for(let i = 1; i < data.length; i++) {
-                        if(identifier == "v")   //  vertex
-                            vertices.push(Number(data[i]));
-                        else if(identifier == "vn") //  normals
-                            normals.push(Number(data[i]));
-                        else if(identifier == "vt") //  texels
-                            texels.push(Number(data[i]));
-                        else if(identifier == "f") {    //  faces   
-                            faces.push(data[i]);
-                        }
-                    }
+                const obj = Mesh.parse_obj(mesh_name, obj_data);
+                if(obj != undefined) {
+                    const {mesh, instance_id} = Mesh.create_mesh(engine, is_instance, mesh_name, obj.mesh_vertices,
+                        obj.mesh_normals, 
+                        obj.mesh_texels, 
+                        obj.mesh_indices);
+                    return new Model(engine, mesh,mesh_name, instance_id);
                 }
-                
-                //  To be more efficient, we read the faces to figure out the correct indices of vertices
-                //  We also normalize the normals so that shaders do not need to do it themselves.
-
-                //  based off https://carmencincotti.com/2022-06-06/load-obj-files-into-webgpu/
-                //  https://github.com/ccincotti3/webgpu_cloth_simulator/blob/a7929ff10975ba06bbd6ef7a495d55faeedd1ccb/src/ObjLoader.ts
-                
-                let mesh_vertices: number[] = [];
-                let mesh_texels: number[] = [];
-                let mesh_normals: number[] = [];
-                let mesh_indices: number[] = [];
-
-                let seen_indices: Record<string, number> = {};
-                let index = 0;
-                for (let i = 0; i < faces.length; i++) {
-                    let face: string = faces[i];
-                    //  This means that this vertex combination has been found before.
-                    //  So we just add the index to the list.
-                    if(seen_indices[face] != undefined) {
-                        mesh_indices.push(seen_indices[face]);
-                        continue;
-                    }
-                    //  Otherwise we never found it before so we add it to the tracked combinations.
-                    //  Then we increment the index for the next new combination.
-                    seen_indices[face] = index;
-                    mesh_indices.push(index++);
-
-                    //  Finally we need to parse the string so that the mesh's indices point to 
-                    //  the correct vertices, normals, and texels.
-                    //  .OBJ files are 1-indexed so we need to correct that.
-                    let face_delineated: string[] = face.split("/");
-                    if(face_delineated.length < 0) {
-                        console.error(`Model ${mesh_name} has improperly formatted faces.`);
-                        return;
-                    }
-                    mesh_vertices.push(vertices[(Number(face_delineated[0]) - 1) * 3 + 0]);
-                    mesh_vertices.push(vertices[(Number(face_delineated[0]) - 1) * 3 + 1]);
-                    mesh_vertices.push(vertices[(Number(face_delineated[0]) - 1) * 3 + 2]);
-                    
-                    mesh_texels.push(texels[(Number(face_delineated[1]) - 1) * 3 + 0]);
-                    mesh_texels.push(texels[(Number(face_delineated[1]) - 1) * 3 + 1]);
-                    mesh_texels.push(texels[(Number(face_delineated[1]) - 1) * 3 + 2]);
-                    
-                    //  Normalizing normals.;
-                    let normal_vector = vec3.normalize(vec3.fromValues(normals[(Number(face_delineated[2]) - 1) * 3 + 0],
-                        normals[(Number(face_delineated[2]) - 1) * 3 + 1],
-                        normals[(Number(face_delineated[2]) - 1) * 3 + 2]));
-                    mesh_normals.push(normal_vector[0]);
-                    mesh_normals.push(normal_vector[1]);
-                    mesh_normals.push(normal_vector[2]);
-                }
-
-                let mesh_buffer = new MeshBuffer(engine.device, mesh_name, mesh_vertices,
-                    mesh_normals, mesh_texels, mesh_indices);
-                Mesh.allocated_meshes[mesh_name].data = mesh_buffer;
-                if(mesh_buffer != undefined) {   
-                    Mesh.allocated_meshes[mesh_name].usage++;
-                    return new Model(engine, new Mesh(mesh_name, mesh_buffer), mesh_name);
-                }
-                else
-                    return undefined;
             }
             //  Or the mesh already exists
             else {
-                let mesh_buffer = Mesh.allocated_meshes[mesh_name].data;
-                if(mesh_buffer != undefined) {
-                    Mesh.allocated_meshes[mesh_name].usage++;
-                    return new Model(engine, new Mesh(mesh_name, mesh_buffer), mesh_name);
-                }
-                else {
-                    console.error("The model is being used, but for some reason it does not exist.");
-                    return undefined;
-                }
+                const allocated = Mesh.get_allocated_mesh(mesh_name);
+                if(allocated)
+                    return new Model(engine, allocated.mesh, mesh_name, allocated.instance_id);
             }
+        }
+    }
+
+    update_uniform(engine: Engine, model_view: Mat4, normal_matrix: Mat3) {
+        //  Non instances have their own mesh data.
+        if(!this.is_instance && this.uniform_buffer) {
+            this.uniform_data.set(model_view, 0);
+            this.uniform_data.set(normal_matrix, 16);
+            engine.device.queue.writeBuffer(this.uniform_buffer, 0, this.uniform_data);
+        }
+        //  Instances share an instance buffer.
+        else if (this.is_instance) {
+            let instance_buffer = Mesh.allocated_meshes[this.mesh.name].instance_buffer;
+            if(instance_buffer == undefined) {
+                console.error(`${this.mesh.name}'s instance buffer is invalid.`);
+                return;
+            }
+            instance_buffer.update_uniform(engine, model_view, normal_matrix);
         }
     }
 
@@ -168,8 +137,9 @@ export class Model {
      * Frees up resources.
      */
     destroy() {
-        this.mesh.destroy();
-        this.uniform_buffer.destroy();
+        this.mesh.destroy(this.is_instance, this.instance_id);
+        if(this.uniform_buffer)
+            this.uniform_buffer.destroy();
     }
 }
 

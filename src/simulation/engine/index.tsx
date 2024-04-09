@@ -4,7 +4,8 @@ import { ModelPipeline } from "simulation/world/model";
  * The bind group layouts needed for the engine to render .
  */
 export type BindGroupLayouts = {
-    model_bind_group_layout: GPUBindGroupLayout[]
+    model_bind_group_layout: GPUBindGroupLayout[],
+    instance_bind_group_layout: GPUBindGroupLayout[],
 };
 
 export class Engine {
@@ -50,33 +51,47 @@ export class Engine {
         });
     
         //  The bind groups for the pipelines.
+        
+        const model_bind_group_layout: GPUBindGroupLayout[] = [
+            device.createBindGroupLayout({  //  group 0 - projection matrix
+                entries: [{
+                    binding: 0,
+                    visibility: GPUShaderStage.VERTEX,
+                    buffer: {
+                        type: 'uniform',
+                    },
+                }],
+            }),
+            device.createBindGroupLayout({  //  group 1 - uniform buffer with model*view matrix + normal matrix
+                entries: [{
+                    binding: 0,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type: 'uniform',
+                    },
+                }],
+            }),
+        ]
+        const instance_bind_group_layout: GPUBindGroupLayout[] = [
+            model_bind_group_layout[0],
+            device.createBindGroupLayout({  //  group 1 - storage buffer with model*view matrix + normal matrix
+                entries: [{
+                    binding: 0,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type: "read-only-storage"
+                    }
+                }]
+            })
+        ]
         const bind_group_layouts: BindGroupLayouts = {
-            //  Model Pipeline bind groups
-            model_bind_group_layout: [
-                device.createBindGroupLayout({  //  group 0 - projection matrix
-                    entries: [{
-                        binding: 0,
-                        visibility: GPUShaderStage.VERTEX,
-                        buffer: {
-                            type: 'uniform',
-                        },
-                    }],
-                }),
-                device.createBindGroupLayout({  //  group 1 - model*view matrix + normal matrix
-                    entries: [{
-                        binding: 0,
-                        visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-                        buffer: {
-                            type: 'uniform',
-                        },
-                    }],
-                }),
-            ]
+            model_bind_group_layout: model_bind_group_layout,
+            instance_bind_group_layout: instance_bind_group_layout
         };
         
         //  Create the pipeline responsible for rendering models.
         const model_pipeline: ModelPipeline = new ModelPipeline(device, context,
-            bind_group_layouts.model_bind_group_layout, canvasFormat);
+            bind_group_layouts, canvasFormat);
 
         let engine: Engine = new Engine(
             adapter,

@@ -47,8 +47,8 @@ export class Simulation {
         let camera: Camera = new Camera(engine, new Eye(vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, -1)),
         Math.PI / 5, 1, .1, 100);
         await Mesh.initialize_dictionary();
-        let model1 = await Model.load_from_file(engine, "cube");
-        let model2 = await Model.load_from_file(engine, "cliff");
+        let model1 = await Model.load_from_file(engine, "cube", false);
+        let model2 = await Model.load_from_file(engine, "cliff", false);
         if(model1 == undefined || model2 == undefined)
         {
             console.error("model is undefined");
@@ -59,8 +59,8 @@ export class Simulation {
         
         let entities: Entity[] = [e1, e2];
 
-        for(let i = 0; i < 2000; i++) {
-            let model = await Model.load_from_file(engine, Math.random() > 5 ? "cube" : "cliff");
+        for(let i = 0; i < 5000; i++) {
+            let model = await Model.load_from_file(engine, Math.random() > 0 ? "cube" : "cliff");
             if(!model) continue;
             let angle = Math.random() * 2 * Math.PI;
             let range = Math.random() * 2 ;
@@ -75,8 +75,10 @@ export class Simulation {
             );
         }
         let world: World = new World(camera, entities)
+        let simulation: Simulation = new Simulation(engine, world);
         console.log("Successfully created simulation.");
-        return new Simulation(engine, world);
+        console.log(simulation);
+        return simulation;
     }
 
     /**
