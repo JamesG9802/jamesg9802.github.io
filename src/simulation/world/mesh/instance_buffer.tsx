@@ -62,7 +62,7 @@ export class InstanceBuffer {
 
         this.uniform_bind_group = engine.device.createBindGroup({
             label: `${mesh_name} instance's bind group`,
-            layout: engine.bind_group_layouts.instance_bind_group_layout[1],
+            layout: engine.model_pipeline.instance_pipeline.getBindGroupLayout(1),
             entries: [{
                 binding: 0,
                 resource: {buffer: this.uniform_buffer}
@@ -141,7 +141,7 @@ export class InstanceBuffer {
             this.uniform_buffer = this.#create_uniform_buffer(engine.device, this.uniform_buffer.label, this.tracked_instances.count);
             this.uniform_bind_group = engine.device.createBindGroup({
                 label: `${this.uniform_bind_group.label}`,
-                layout: engine.bind_group_layouts.instance_bind_group_layout[1],
+                layout: engine.model_pipeline.instance_pipeline.getBindGroupLayout(1),
                 entries: [{
                     binding: 0,
                     resource: {buffer: this.uniform_buffer}

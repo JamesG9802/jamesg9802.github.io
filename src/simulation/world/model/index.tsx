@@ -73,7 +73,7 @@ export class Model {
             });
             this.bind_group = engine.device.createBindGroup({
                 label: "Renderer bind group",
-                layout: engine.bind_group_layouts.model_bind_group_layout[1],
+                layout: engine.model_pipeline.unique_pipeline.getBindGroupLayout(1),
                 entries: [{
                     binding: 0,
                     resource: {buffer: this.uniform_buffer}

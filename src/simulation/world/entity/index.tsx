@@ -50,14 +50,13 @@ export class Entity {
     
         mat4.multiply(translation_matrix, scaling_matrix, this.#transform);
         mat4.multiply(this.#transform, rotation_matrix, this.#transform);
-        this.#transform_changed = false;
     }
 
     /**
      * Gets all relevant data from the entity to put into the uniform buffer.
      */
     #update_uniform(engine: Engine, world: World) {
-        if(!world.main_camera.eye.updated_view) return;
+        if(!this.#transform_changed && !world.main_camera.eye.updated_view) return;
         //  4 bytes per float
         let model_view = mat4.multiply(world.main_camera.eye.view_matrix, this.#transform);
         let normal_matrix = mat3.fromMat4(model_view);
@@ -65,6 +64,7 @@ export class Entity {
         mat3.inverse(normal_matrix, normal_matrix);
 
         this.model.update_uniform(engine, model_view, normal_matrix);
+        this.#transform_changed = false;
     }
 
     /**
@@ -89,9 +89,7 @@ export class Entity {
      * @param engine 
      */
     render(engine: Engine, world: World) {
-        //  There is only a need to update the Model*View matrix if
-        //  the model (position, rotation, scale) changed or the view (position, forward) changed.
-        engine.model_pipeline.render_model(world, this.model);
+        engine.model_pipeline.render_unique(world, this.model);
     }
 
     destroy() {

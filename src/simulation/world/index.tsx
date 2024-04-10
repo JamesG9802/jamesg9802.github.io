@@ -7,9 +7,16 @@ export class World {
     main_camera: Camera;
     entities: Entity[];
 
-    constructor(main_camera: Camera, entities?: Entity[]) {
+    constructor(main_camera: Camera, entities: Entity[]) {
         this.main_camera = main_camera;
-        this.entities = entities != undefined ? [...entities] : [];
+        this.entities = entities;
+    }
+
+    static create(main_camera: Camera, entities?: Entity[]) {
+        return new World(
+            main_camera,
+            entities != undefined ? [...entities] : []
+        );
     }
 
     /**
@@ -26,8 +33,14 @@ export class World {
      * Renders all entities using the engine's model pipeline.
      */
     render(engine: Engine) {
+        //  Before rendering, we tell the camera to update it's view matrix
+        //  if any changes were made.
+        if(this.main_camera.eye.updated_view) {
+            console.log("a")
+            this.main_camera.eye.compute_view_matrix();
+        }
 
-        engine.model_pipeline.begin_model_render(engine.device, engine.context);
+        engine.model_pipeline.begin_unique_render(engine.device, engine.context);
 
         //  First update the uniforms of all entities.
         for(let i = 0; i < this.entities.length; i++) {
@@ -38,7 +51,7 @@ export class World {
             }
         }
         
-        engine.model_pipeline.end_model_render(engine.device);
+        engine.model_pipeline.end_unique_render(engine.device);
 
         //  Next we render all instances
         
