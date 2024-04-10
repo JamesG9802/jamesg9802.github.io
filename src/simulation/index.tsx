@@ -6,11 +6,32 @@ import { Entity } from "./world/entity";
 import { Mesh } from "./world/mesh";
 import { Model } from "./world/model";
 
+/**
+ * A simulation is a class that handles the logic for drawing 3d objects to a given HTML Canvas element.
+ */
 export class Simulation {
+    /**
+     * The current frame number of the simulation. So on a computer that runs at 60 frames per second,
+     * the frame number will increment every 1/60th of a second and the `update()` and `render()`
+     * functions will be called. 
+     */
     #frame: number;
+
+    /**
+     * The number of milliseconds since the UTC epoch measured when the last frames per second (FPS)
+     * check was made.
+     */
     #timeSinceLastFPSCheck: number;
+    
+    /**
+     * The frame number measured when the last frames per second (FPS) check was made.
+     */
     #frameSinceLastFPSCheck: number;
-    last_time: number;
+
+    /**
+     * The number of milliseconds since the UTC epoch measured at the last `update()` call. 
+     */
+    #last_time: number;
 
     x: number = 0;
     y: number = 0;
@@ -21,7 +42,6 @@ export class Simulation {
     left_rotate_pressed: boolean = false;
     right_rotate_pressed: boolean = false;
 
-    aspect_ratio: number;
     engine: Engine;
     world: World;
 
@@ -30,9 +50,8 @@ export class Simulation {
         this.#frameSinceLastFPSCheck = 0;
         this.#frame = 0;
 
-        this.last_time = this.#timeSinceLastFPSCheck;
+        this.#last_time = this.#timeSinceLastFPSCheck;
 
-        this.aspect_ratio = 1;
         this.engine = engine;
         this.world = world;
     }
@@ -74,7 +93,7 @@ export class Simulation {
                     model)
             );
         }
-        let world: World = new World(camera, entities)
+        let world: World = World.create(camera, entities);
         let simulation: Simulation = new Simulation(engine, world);
         console.log("Successfully created simulation.");
         console.log(simulation);
@@ -85,10 +104,10 @@ export class Simulation {
      * Upon a resize event, GPU related fields need to be updated
      */
     resize(width: number, height: number) {
-        this.aspect_ratio = height != 0 ? width / height : 1; 
+        let aspect_ratio = height != 0 ? width / height : 1; 
         this.engine.resize();
-        this.world.main_camera.recompute_projection_matrix(this.engine.device, 
-            Math.PI / 5, this.aspect_ratio, .1, 100, this.world.main_camera.project_matrix);
+        this.world.main_camera.set_perspective_projection(this.engine.device, 
+            Math.PI / 5, aspect_ratio, .1, 100);
     }
 
     /**
@@ -96,8 +115,8 @@ export class Simulation {
      */
     update() {
         let now = new Date().getTime();
-        this.world.update((now - this.last_time)/1000);
-        this.last_time = now;
+        this.world.update((now - this.#last_time)/1000);
+        this.#last_time = now;
 
         const radius = 6;
         
@@ -109,14 +128,15 @@ export class Simulation {
             this.y++;
         if(this.down_pressed)
             this.y--;
+        if(this.left_pressed || this.right_pressed || this.up_pressed || this.down_pressed)
         this.world.main_camera.eye.set_position_and_forward(
             vec3.fromValues(radius*Math.sin(this.x / 64), radius*Math.sin(this.y / 64), radius*Math.cos(this.x / 64)),
             vec3.subtract(vec3.fromValues(radius*Math.sin(this.x / 64), radius*Math.sin(this.y / 64), radius*Math.cos(this.x / 64)), vec3.fromValues(0,0,0)),
         );
         if(this.left_rotate_pressed)
-            this.world.main_camera.eye.set_forward(vec3.rotateY(this.world.main_camera.eye.forward, vec3.fromValues(0, 0, 0), Math.PI / 64));
+            this.world.main_camera.eye.forward = vec3.rotateY(this.world.main_camera.eye.forward, vec3.fromValues(0, 0, 0), Math.PI / 64);
         if(this.right_rotate_pressed)
-            this.world.main_camera.eye.set_forward(vec3.rotateY(this.world.main_camera.eye.forward, vec3.fromValues(0, 0, 0), -Math.PI / 64));
+            this.world.main_camera.eye.forward = vec3.rotateY(this.world.main_camera.eye.forward, vec3.fromValues(0, 0, 0), -Math.PI / 64);
         
         this.#frame += 1;
         const diff = new Date().getTime() - this.#timeSinceLastFPSCheck;

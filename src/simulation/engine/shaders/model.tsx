@@ -1,8 +1,14 @@
 import { model_uniform_bytelength } from "simulation/world/model";
 
-export function get_model_shader(is_model_shader: boolean) {
+/**
+ * Gets the source code for the model shader. Returns a different version depending on
+ * whether or not it is intended for the unique or instance pipeline.
+ * @param for_unique true if for the unique pipeline. false if for the instance pipeline.
+ * @returns the shader code.
+ */
+export function get_model_shader(for_unique: boolean) {
 
-    const vertex_out = is_model_shader ?
+    const vertex_out = for_unique ?
     `struct VertexOut {
         @builtin(position) position : vec4f,
         @location(1) normal : vec3f,
@@ -15,12 +21,12 @@ export function get_model_shader(is_model_shader: boolean) {
         @location(1) normal : vec3f,
         @location(2) eye_coords : vec3f
     }`;
-    const model_bindings = is_model_shader ?
+    const model_bindings = for_unique ?
     `@group(1) @binding(0) var<uniform> model_data: ModelData;`
     :
     `@group(1) @binding(0) var<storage, read> model_data: array<f32>;`;
 
-    const model_view_declaration = is_model_shader ?
+    const model_view_declaration = for_unique ?
     `let model_view = model_data.model_view;`
     :
     `var model_view: mat4x4f;
@@ -41,7 +47,7 @@ export function get_model_shader(is_model_shader: boolean) {
     model_view[3][2] = model_data[i_index * (${model_uniform_bytelength / 4})+14];
     model_view[3][3] = model_data[i_index * (${model_uniform_bytelength / 4})+15];
     `;
-    const normal_matrix_declaration = is_model_shader ?
+    const normal_matrix_declaration = for_unique ?
     `let normal_matrix = model_data.normal_matrix;`
     :
     `var normal_matrix: mat3x3f;
@@ -55,7 +61,7 @@ export function get_model_shader(is_model_shader: boolean) {
     normal_matrix[2][1] = model_data[i_index * (${model_uniform_bytelength / 4})+16+9];
     normal_matrix[2][2] = model_data[i_index * (${model_uniform_bytelength / 4})+16+10];`;
 
-    const set_vertex_out = is_model_shader ?
+    const set_vertex_out = for_unique ?
     `output.position = projection_data.projection * eye_coords;
     //  all models are guaranteed to have normalized normals
     output.normal = normal;
@@ -67,7 +73,7 @@ export function get_model_shader(is_model_shader: boolean) {
     output.normal = normal;
     output.eye_coords = eye_coords.xyz/eye_coords.w;`;
 
-    const vertex_arguments = is_model_shader ?
+    const vertex_arguments = for_unique ?
     `@location(0) pos: vec3f,
     @location(1) normal: vec3f,
     @location(2) texel: vec2f`
@@ -77,7 +83,7 @@ export function get_model_shader(is_model_shader: boolean) {
     @location(1) normal: vec3f,
     @location(2) texel: vec2f`;
 
-    const fragment_arguments = is_model_shader ?
+    const fragment_arguments = for_unique ?
     `@location(1) normal: vec3f, 
     @location(2) eye_coords: vec3f`
     :
