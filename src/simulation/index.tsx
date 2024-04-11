@@ -42,9 +42,21 @@ export class Simulation {
     left_rotate_pressed: boolean = false;
     right_rotate_pressed: boolean = false;
 
+    /**
+     * The engine connecting to the WebGPU API.
+     */
     engine: Engine;
+
+    /**
+     * The world containing the simulation information.
+     */
     world: World;
 
+    /**
+     * Creates and returns a simulation. Use `create()` instead.
+     * @param engine 
+     * @param world 
+     */
     constructor(engine: Engine, world: World) {
         this.#timeSinceLastFPSCheck = new Date().getTime();
         this.#frameSinceLastFPSCheck = 0;
@@ -56,6 +68,11 @@ export class Simulation {
         this.world = world;
     }
 
+    /**
+     * Creates and returns a new simulation.
+     * @param canvas 
+     * @returns 
+     */
     static async create(canvas: HTMLCanvasElement): Promise<Simulation | undefined> {
         let engine: Engine | undefined = await Engine.create(canvas);
         if(engine == undefined) {
@@ -63,11 +80,11 @@ export class Simulation {
             return;
         }
             
-        let camera: Camera = new Camera(engine, new Eye(vec3.fromValues(0, 0, 0), vec3.fromValues(0, 0, -1)),
+        let camera: Camera = new Camera(engine, new Eye(vec3.fromValues(0, 0, 6), vec3.fromValues(0, 0, 1)),
         Math.PI / 5, 1, .1, 100);
         await Mesh.initialize_dictionary();
-        let model1 = await Model.load_from_file(engine, "cube", false);
-        let model2 = await Model.load_from_file(engine, "cliff", false);
+        let model1 = await Model.load_from_file(engine, "cube");
+        let model2 = await Model.load_from_file(engine, "cliff");
         if(model1 == undefined || model2 == undefined)
         {
             console.error("model is undefined");
@@ -78,8 +95,9 @@ export class Simulation {
         
         let entities: Entity[] = [e1, e2];
 
-        for(let i = 0; i < 5000; i++) {
-            let model = await Model.load_from_file(engine, Math.random() > 0 ? "cube" : "cliff");
+        for(let i = 0; i < 20000; i++) {
+            //let model = await Model.load_from_file(engine, Math.random() > 0 ? "cube" : "cliff");
+            let model = model1.create_instance_copy(engine);
             if(!model) continue;
             let angle = Math.random() * 2 * Math.PI;
             let range = Math.random() * 2 ;

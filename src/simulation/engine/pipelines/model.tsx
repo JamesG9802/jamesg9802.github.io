@@ -1,17 +1,16 @@
 import { Model } from "simulation/world/model";
 import { World } from "simulation/world";
 import { get_model_shader } from "../shaders/model";
-import { Mesh } from "simulation/world/mesh";
 
 // (1 and 4 are currently the only possible values.)
 const multi_sample_count = 4;
 
 /**
- * Render pipeline specifically for rendering models.
+ * A render pipeline for specifically models.
  */
 export class ModelPipeline {
     /**
-     * Current command encoder for the rendering.
+     * The current command encoder for the rendering.
      */
     #command_encoder: GPUCommandEncoder | undefined; 
 
@@ -31,14 +30,17 @@ export class ModelPipeline {
     #multisampling_view: GPUTextureView;
 
     /**
-     * Current render pass for the command encoder.
+     * The current render pass for the unique models pipeline.
      */
-    #model_render_pass: GPURenderPassEncoder | undefined;
+    #unique_render_pass: GPURenderPassEncoder | undefined;
 
+    /**
+     * The current render pass for the instance models pipeline.
+     */
     #instance_render_pass: GPURenderPassEncoder | undefined;
 
     /**
-     * Render pipeline for models.
+     * Render pipeline for uniques.
      */
     unique_pipeline: GPURenderPipeline;
 
@@ -48,7 +50,7 @@ export class ModelPipeline {
     instance_pipeline: GPURenderPipeline;
 
     /**
-     * Creates a new Model Pipeline.
+     * Creates a new Model Pipeline. Use `create()` instead.
      * @param device the GPU device
      * @param context the canvas's context
      * @param bind_group_layout the layout for the model pipeline
@@ -66,12 +68,14 @@ export class ModelPipeline {
         this.#multisampling_view = multisampling_view;
         this.unique_pipeline = unique_pipeline;
         this.instance_pipeline = instance_pipeline;
-        //console.info("Model Shader");
-        //console.info(get_model_shader(true));
-        //console.info("Instance Shader");
-        //console.info(get_model_shader(false));
     }
     
+    /**
+     * Creates a new depth texture
+     * @param device 
+     * @param context 
+     * @returns 
+     */
     static #create_depth_texture(device: GPUDevice, context: GPUCanvasContext): GPUTexture {
         return device.createTexture({
             size: [context.canvas.width, context.canvas.height],
@@ -81,6 +85,13 @@ export class ModelPipeline {
         });
     }
 
+    /**
+     * Creates a new multisampling texture and view.
+     * @param device 
+     * @param context 
+     * @param canvas_format 
+     * @returns 
+     */
     static #create_multisampling(device: GPUDevice, context: GPUCanvasContext, 
         canvas_format: GPUTextureFormat    
     ): {
@@ -100,6 +111,13 @@ export class ModelPipeline {
         }
     }
 
+    /**
+     * Creates the unique and instance render pipelines.
+     * @param device 
+     * @param canvas_format 
+     * @param depth_texture 
+     * @returns 
+     */
     static #create_pipelines(device: GPUDevice, canvas_format: GPUTextureFormat, 
         depth_texture: GPUTexture
     ): {
@@ -228,6 +246,13 @@ export class ModelPipeline {
         }
     }
 
+    /**
+     * Creates a new Model Pipeline.
+     * @param device 
+     * @param context 
+     * @param canvas_format 
+     * @returns 
+     */
     static create(device: GPUDevice, context: GPUCanvasContext, 
         canvas_format: GPUTextureFormat
     ): ModelPipeline {
@@ -250,7 +275,7 @@ export class ModelPipeline {
     }
 
     /**
-     * When the screen is resized, the pipeline resizes its depth texture as well.
+     * When the screen is resized, the pipeline resizes its depth and multisampling texture as well.
      * @param context 
      */
     resize(device: GPUDevice, context: GPUCanvasContext) {
@@ -272,12 +297,12 @@ export class ModelPipeline {
     }
 
     /**
-     * Creates a command encoder for the render pass to be sent to.
+     * Creates a command encoder for the unique render pass to be sent to.
      * @param device 
      */
     begin_unique_render(device: GPUDevice, context: GPUCanvasContext) {
         this.#command_encoder = device.createCommandEncoder();
-        this.#model_render_pass = this.#command_encoder.beginRenderPass({
+        this.#unique_render_pass = this.#command_encoder.beginRenderPass({
             colorAttachments: [{
                 view: this.#multisampling_view,
                 resolveTarget: context.getCurrentTexture().createView(),
@@ -292,23 +317,23 @@ export class ModelPipeline {
                 depthStoreOp: "store",
             }
         });
-        this.#model_render_pass.setPipeline(this.unique_pipeline);
+        this.#unique_render_pass.setPipeline(this.unique_pipeline);
         
     }
 
     /**
-     * Submits the current command encoder to the GPU.
+     * Submits the unique command encoder to the GPU.
      * @param device 
      */
     end_unique_render(device: GPUDevice) {
-        if(this.#command_encoder && this.#model_render_pass) {
-            this.#model_render_pass.end();
+        if(this.#command_encoder && this.#unique_render_pass) {
+            this.#unique_render_pass.end();
             device.queue.submit([this.#command_encoder.finish()]);
         }
     }
 
     /**
-     * Creates a command encoder for the render pass to be sent to.
+     * Creates a command encoder for the instance render pass to be sent to.
      * @param device 
      */
     begin_instance_render(device: GPUDevice, context: GPUCanvasContext) {
@@ -332,7 +357,7 @@ export class ModelPipeline {
     }
 
     /**
-     * Submits the current command encoder to the GPU.
+     * Submits the instance command encoder to the GPU.
      * @param device 
      */
     end_instance_render(device: GPUDevice) {
@@ -343,57 +368,60 @@ export class ModelPipeline {
     }
 
     /**
-     * Simplest way to render model. `begin_render_command` must be called first`.
+     * Renders unique models.
      * @param engine 
      * @param model 
      */
     render_unique(world: World, model: Model) {
-        if(!this.#command_encoder || !this.#model_render_pass || !model.bind_group) 
+        if(!this.#command_encoder || !this.#unique_render_pass) 
             return;
-        
         //  The first binding group is for the camera's projection matrix.
-        this.#model_render_pass.setBindGroup(0, world.main_camera.projection_bind_group);
+        this.#unique_render_pass.setBindGroup(0, world.main_camera.projection_bind_group);
         //  The second binding group is for the modelview and normal matries. 
-        this.#model_render_pass.setBindGroup(1, model.bind_group);
+        this.#unique_render_pass.setBindGroup(1, model.uniform_buffer.bind_group);
 
         let vertices = model.mesh.mesh_buffer.get_vertices_buffer();
-        this.#model_render_pass.setVertexBuffer(0, vertices.buffer, vertices.offset, vertices.size);
+        this.#unique_render_pass.setVertexBuffer(0, vertices.buffer, vertices.offset, vertices.size);
 
         let normals = model.mesh.mesh_buffer.get_normals_buffer();
-        this.#model_render_pass.setVertexBuffer(1, normals.buffer, normals.offset, normals.size);
+        this.#unique_render_pass.setVertexBuffer(1, normals.buffer, normals.offset, normals.size);
 
         let texels = model.mesh.mesh_buffer.get_texels_buffer();
-        this.#model_render_pass.setVertexBuffer(2, texels.buffer, texels.offset, texels.size);
+        this.#unique_render_pass.setVertexBuffer(2, texels.buffer, texels.offset, texels.size);
 
         let indices = model.mesh.mesh_buffer.get_indices_buffer();
-        this.#model_render_pass.setIndexBuffer(indices.buffer, "uint32", indices.offset, indices.size);
+        this.#unique_render_pass.setIndexBuffer(indices.buffer, "uint32", indices.offset, indices.size);
 
-        this.#model_render_pass.drawIndexed(model.mesh.mesh_buffer.vertices_count);
+        this.#unique_render_pass.drawIndexed(model.mesh.mesh_buffer.vertices_count);
+        //this.#model_render_pass.drawIndexedIndirect(model.uniform_buffer.indirect_buffer, 0);
     }
     
-    render_instance(world: World, mesh_name: string) {
+    /**
+     * Renders instance models.
+     * @param world 
+     * @param model 
+     * @returns 
+     */
+    render_instance(world: World, model: Model) {
         if(!this.#command_encoder || !this.#instance_render_pass) 
             return;
-        let instance_information = Mesh.allocated_meshes[mesh_name];
-        if(!instance_information.instance_buffer || !instance_information.data)
-            return;
-        
         //  The first binding group is for the camera's projection matrix.
         this.#instance_render_pass.setBindGroup(0, world.main_camera.projection_bind_group);
         //  The second binding group is for the modelview and normal matries.
-        this.#instance_render_pass.setBindGroup(1, instance_information.instance_buffer.uniform_bind_group);
+        this.#instance_render_pass.setBindGroup(1, model.uniform_buffer.bind_group);
 
-        let vertices = instance_information.data.get_vertices_buffer();
+        let vertices = model.mesh.mesh_buffer.get_vertices_buffer();
         this.#instance_render_pass.setVertexBuffer(0, vertices.buffer, vertices.offset, vertices.size);
 
-        let normals = instance_information.data.get_normals_buffer();
+        let normals = model.mesh.mesh_buffer.get_normals_buffer();
         this.#instance_render_pass.setVertexBuffer(1, normals.buffer, normals.offset, normals.size);
 
-        let texels = instance_information.data.get_texels_buffer();
+        let texels = model.mesh.mesh_buffer.get_texels_buffer();
         this.#instance_render_pass.setVertexBuffer(2, texels.buffer, texels.offset, texels.size);
 
-        let indices = instance_information.data.get_indices_buffer();
+        let indices = model.mesh.mesh_buffer.get_indices_buffer();
         this.#instance_render_pass.setIndexBuffer(indices.buffer, "uint32", indices.offset, indices.size);
-        this.#instance_render_pass.drawIndexedIndirect(instance_information.instance_buffer.indirect_buffer, 0);
+
+        this.#instance_render_pass.drawIndexedIndirect(model.uniform_buffer.indirect_buffer, 0);
     }
 }

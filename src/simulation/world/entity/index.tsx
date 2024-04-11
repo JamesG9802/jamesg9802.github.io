@@ -3,23 +3,51 @@ import { Model } from "simulation/world/model";
 import { Engine } from "simulation/engine";
 import { World } from "simulation/world";
 
+/**
+ * An entity is the basic agent in the simulation. They have a position, rotation, and scale
+ * in the world. They are updated and then rendered every frame.
+ */
 export class Entity {
-    //  GPU Related fields
-    model: Model;
-
-    //  Entity related fields   
     /**
-     *  Tracks if the transform changed to determine if the entity needs to update its uniform buffer.
+     * The model of the entity.
+     */
+    model: Model;
+ 
+    /**
+     *  Flat to track if the transform changed to determine if the entity needs to update its uniform buffer.
      */ 
     #transform_changed: boolean;
+
+    /**
+     * The entity's transform matrix.
+     */
     #transform: Mat4;
 
+    /**
+     * The entity's position.
+     */
     #position: Vec3;
+
+    /**
+     * The entity's rotation.
+     */
     #rotation: Quat;
+
+    /**
+     * The entity's scale.
+     */
     #scale: Vec3;
     
     starting_height: number;
     time: number; 
+
+    /**
+     * Creates and returns a new Entity.
+     * @param position 
+     * @param rotation 
+     * @param scale 
+     * @param model 
+     */
     constructor(position: Vec3, rotation: Quat, scale: Vec3, model: Model) {
         this.model = model;
     
@@ -31,12 +59,16 @@ export class Entity {
         this.#rotation = rotation;
         this.#scale = scale;
         
-        this.#update_transform();
+        this.#update_transform_matrix();
         this.starting_height = position[1];
         this.time = Math.random() * 10;
     }
 
-    #update_transform() {
+    /**
+     * Updates the entity's CPU side transform.
+     * @returns 
+     */
+    #update_transform_matrix() {
         if(!this.#transform_changed) return;
 
         this.#transform = mat4.identity();
@@ -53,9 +85,9 @@ export class Entity {
     }
 
     /**
-     * Gets all relevant data from the entity to put into the uniform buffer.
+     * Updates the entity's CPU side uniform data.
      */
-    #update_uniform(engine: Engine, world: World) {
+    #update_model_uniform(engine: Engine, world: World) {
         if(!this.#transform_changed && !world.main_camera.eye.updated_view) return;
         //  4 bytes per float
         let model_view = mat4.multiply(world.main_camera.eye.view_matrix, this.#transform);
@@ -79,9 +111,17 @@ export class Entity {
     /**
      * Before rendering, entities need to write to their uniform buffers
      */
-    write_uniform(engine: Engine, world: World) {
-        this.#update_transform();
-        this.#update_uniform(engine, world);
+    update_buffers(engine: Engine, world: World) {
+        this.#update_transform_matrix();
+        this.#update_model_uniform(engine, world);
+    }
+
+    /**
+     * Writes the data from the entity's CPU side uniform data to the GPU.
+     * @param engine 
+     */
+    write_buffers(engine: Engine) {
+        this.model.write_uniform(engine);
     }
 
     /**
@@ -89,9 +129,15 @@ export class Entity {
      * @param engine 
      */
     render(engine: Engine, world: World) {
-        engine.model_pipeline.render_unique(world, this.model);
+        if(this.model.uniform_buffer.for_instance)
+            engine.model_pipeline.render_instance(world, this.model);
+        else
+            engine.model_pipeline.render_unique(world, this.model);
     }
 
+    /**
+     * Frees the entity's resources.
+     */
     destroy() {
         this.model.destroy();
     }
