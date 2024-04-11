@@ -10,9 +10,19 @@ export class Eye {
      */
     updated_view: boolean;
 
+    /**
+     * The eye position.
+     */
     #position: Vec3;
+
+    /**
+     * The direction the eye is looking at.
+     */
     #forward: Vec3;
 
+    /**
+     * The view matrix that will be sent to the GPU during rendering.
+     */
     #view_matrix: Mat4;
 
     /**
@@ -71,6 +81,10 @@ export class Eye {
     }
 }
 
+/**
+ * A camera has a position and direction in the world along with a projection matrix to 
+ * render objects to the screen.
+ */
 export class Camera {
     /**
      * The kind of projection the camera is using.
@@ -92,7 +106,15 @@ export class Camera {
      */
     eye: Eye;
 
-    
+    /**
+     * Creates a camera
+     * @param engine 
+     * @param eye 
+     * @param field_of_view 
+     * @param aspect_ratio 
+     * @param near_plane_distance 
+     * @param far_plane_distance 
+     */
     constructor(engine: Engine, eye: Eye, field_of_view: number, aspect_ratio: number,  
         near_plane_distance: number, far_plane_distance: number) {
         this.eye = eye;

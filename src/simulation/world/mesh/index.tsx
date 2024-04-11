@@ -1,8 +1,6 @@
 import { vec3 } from "wgpu-matrix";
-import { InstanceBuffer } from "./instance_buffer";
 import { MeshBuffer } from "./mesh_buffer";
 import { Engine } from "simulation/engine";
-import { World } from "..";
 
 /**
  * The mesh data of models.
@@ -14,36 +12,43 @@ export class Mesh {
     static mesh_list: { [Name: string]: () => Promise<unknown>};
 
     /**
-     * A dictionary of allocated meshes for instances. Insance models share the same GPUBuffer when using the same mesh.
+     * A dictionary of mesh names to a copy of the actual mesh data,
      */
-    static allocated_meshes: { [Name: string]: {
+    static allocated_meshes: Record<string, {
         /**
          * The actual mesh data.
-        */
-        data: MeshBuffer | undefined, 
+         */
+        mesh_buffer: MeshBuffer | undefined, 
         
         /**
-         * The buffer each instance's uniform data is stored.
+         * The number of users for this buffer.
          */
-        instance_buffer: InstanceBuffer | undefined,
-
-        /**
-         * The number of users of this mesh.
-        */
         usage: number 
-    }};
+    }>;
 
+    /**
+     * The name of the mesh.
+     */
     name: string;
 
+    /**
+     * The actual mesh data.
+     */
     mesh_buffer: MeshBuffer;
 
+    /**
+     * Creates a mesh.
+     * @param name 
+     * @param mesh_buffer 
+     */
     constructor(name: string, mesh_buffer: MeshBuffer) {
         this.name = name;
         this.mesh_buffer = mesh_buffer;
     }
 
     /**
-     * Keeps track of the file paths to every model to be able to load as needed.
+     * Initializes the dictionary to Keep track of the file paths 
+     * to every model to load as needed.
      */
     static async initialize_dictionary() {
         if(Mesh.mesh_list == undefined) {
@@ -66,14 +71,19 @@ export class Mesh {
             if(!(file_name in Mesh.mesh_list)) {
                 this.mesh_list[file_name] = models[path];
                 this.allocated_meshes[file_name] = {
-                    data: undefined,
-                    instance_buffer: undefined,
+                    mesh_buffer: undefined,
                     usage: 0
                 }
             }
         }
     }
 
+    /**
+     * Parses an .obj data into mesh data.
+     * @param mesh_name 
+     * @param obj_data 
+     * @returns 
+     */
     static parse_obj(mesh_name: string, obj_data: string[]): {
         mesh_vertices: number[],
         mesh_texels: number[],
@@ -164,98 +174,58 @@ export class Mesh {
     }
 
     /**
-     * Creates a mesh. If the mesh is an instance, it will add it to the allocated meshes.
-     */
-    static create_mesh(engine: Engine, is_instance: boolean, mesh_name: string, mesh_vertices: number[],
-        mesh_normals: number[], mesh_texels: number[], mesh_indices: number[]
-    ): {mesh: Mesh, instance_id?: number} {
-        let instance_id: number | undefined;
-        let mesh_buffer = new MeshBuffer(engine.device, mesh_name, mesh_vertices,
-            mesh_normals, mesh_texels, mesh_indices);
-    
-        //  Non instances do not share their meshes and thus do not
-        //  track their meshes in the global pool
-        if(is_instance) {
-            Mesh.allocated_meshes[mesh_name].data = mesh_buffer;
-            Mesh.allocated_meshes[mesh_name].instance_buffer 
-                = new InstanceBuffer(engine, mesh_name, [mesh_indices.length, 0, 0, 0, 0]);
-            Mesh.allocated_meshes[mesh_name].usage++;
-            instance_id = Mesh.allocated_meshes[mesh_name].instance_buffer?.add_instance() as number;
-        }
-        return {
-            mesh: new Mesh(mesh_name, mesh_buffer),
-            instance_id: instance_id
-        };
-    }
-
-    /**
-     * Gets a preallocated mesh for an instance.
+     * Gets a mesh by it's name.
      * @param mesh_name the name of the mesh
      * @returns 
      */
-    static get_allocated_mesh(mesh_name: string): {mesh: Mesh, instance_id: number} | undefined {
-        let instance_id: number;
-        let mesh_buffer = Mesh.allocated_meshes[mesh_name].data;
-        if(mesh_buffer != undefined) {
-            Mesh.allocated_meshes[mesh_name].usage++;
-            instance_id = Mesh.allocated_meshes[mesh_name].instance_buffer?.add_instance() as number;
-            return {
-                mesh: new Mesh(mesh_name, mesh_buffer),
-                instance_id: instance_id
-            };
-        }
-        else {
-            console.error("The model is being used, but for some reason it does not exist.");
-            return undefined;
-        }
-    }
-
-    static render_instance(engine: Engine, world: World, mesh_name: string) {
-        if(Mesh.allocated_meshes[mesh_name].usage == 0)
-            return;
-        else if(!Mesh.allocated_meshes[mesh_name].data  || !Mesh.allocated_meshes[mesh_name].instance_buffer) {
-            console.warn(`${mesh_name} is being used but its data/instance buffer doesn't exist.`);
+    static async get_mesh(engine: Engine, mesh_name: string): Promise<Mesh | undefined> {
+        //  Mesh does not exist.
+        if(!(mesh_name in Mesh.mesh_list)) {
+            console.error(`Mesh ${mesh_name} cannot be found.`);
             return;
         }
-        (Mesh.allocated_meshes[mesh_name].instance_buffer as InstanceBuffer).write_uniform(engine.device);
-        engine.model_pipeline.render_instance(world, mesh_name);
-        //  Reset tracking variables so the next iteration's writes will work properly.
-        (Mesh.allocated_meshes[mesh_name].instance_buffer as InstanceBuffer).offset = 0;
-        (Mesh.allocated_meshes[mesh_name].instance_buffer as InstanceBuffer).count_changed = false;
+        //  Mesh does exist but this is either the first time loading it
+        if(Mesh.allocated_meshes[mesh_name].usage <= 0) {  
+            const obj_data: string[] = ((await Mesh.mesh_list[mesh_name]()) as any).default.split("\n");
+            const obj = Mesh.parse_obj(mesh_name, obj_data);
+            if(obj != undefined) {
+                Mesh.allocated_meshes[mesh_name].mesh_buffer = new MeshBuffer(
+                    engine.device,
+                    mesh_name,
+                    obj.mesh_vertices,
+                    obj.mesh_normals, 
+                    obj.mesh_texels, 
+                    obj.mesh_indices
+                );
+            }
+        }
+        if(!Mesh.allocated_meshes[mesh_name].mesh_buffer) {
+            console.error(`Mesh ${mesh_name} is being used, but it's mesh buffer cannot be found.`);
+            return;
+        }
+        const mesh_buffer = Mesh.allocated_meshes[mesh_name].mesh_buffer as MeshBuffer;
+        return new Mesh(mesh_name, mesh_buffer.clone(engine));
     }
 
     /**
-     * Called when the mesh's data needs to be freed. If the mesh came from a non-instance,
-     * it isn't in the global allocated meshes.
+     * Called when the mesh's data needs to be freed.
      * @param is_instance 
      * @returns 
      */
-    destroy(is_instance: boolean, instance_id: number) {
-        //  Non instances have unique mesh data and so can be safely destroyed.
-        if(!is_instance) {
-            this.mesh_buffer.destroy();
-            return;
-        }
+    destroy() {
+        this.mesh_buffer.destroy();
 
         if(!(this.mesh_buffer.name in Mesh.allocated_meshes)) {
             console.warn(`Couldn't find this mesh ${this.mesh_buffer.name} in the allocated mesh list.`);
-            this.mesh_buffer.destroy();
             return;
         }
+
         Mesh.allocated_meshes[this.mesh_buffer.name].usage--;
         
-        //  Instances need to unregister themselves
-        Mesh.allocated_meshes[this.mesh_buffer.name].instance_buffer?.remove_instance(instance_id);
-
         //  Nobody is using this mesh anymore so it can be freed safely.
         if(Mesh.allocated_meshes[this.mesh_buffer.name].usage <= 0) {
-            this.mesh_buffer.destroy();
-            Mesh.allocated_meshes[this.mesh_buffer.name].data = undefined;
-            if(Mesh.allocated_meshes[this.mesh_buffer.name].instance_buffer == undefined) {
-                console.error(`${this.mesh_buffer.name} is an instance, yet no instance buffer was found.`);
-            }
-            Mesh.allocated_meshes[this.mesh_buffer.name].instance_buffer?.destroy();
-            Mesh.allocated_meshes[this.mesh_buffer.name].instance_buffer = undefined;
+            Mesh.allocated_meshes[this.mesh_buffer.name].mesh_buffer?.destroy();
+            Mesh.allocated_meshes[this.mesh_buffer.name].mesh_buffer = undefined;
         }
     }
 }
