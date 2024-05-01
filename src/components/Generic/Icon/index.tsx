@@ -1,10 +1,10 @@
 import { GenericComponentProps } from "components/Generic";
 import "./index.css";
-import Touchable from "components/Generic/Touchable";
+import Touchable, { TouchableProps } from "components/Generic/Touchable";
 
-export default function Icon({style, className, children}: GenericComponentProps) {
+export default function Icon({style, className, onClickCapture, children}: TouchableProps) {
     return (
-        <Touchable>
+        <Touchable onClickCapture={onClickCapture}>
             <div style={style} className={className != undefined ? "Icon " + className : "Icon"}>
                 {children}
             </div>

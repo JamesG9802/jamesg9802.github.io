@@ -1,5 +1,5 @@
 import { Engine } from 'simulation/engine';
-import { Mat4, Vec3, mat4, vec3 } from 'wgpu-matrix';
+import { Mat4, Vec3, Vec4, mat4, vec3, vec4 } from 'wgpu-matrix';
 
 /**
  * Where the camera is looking from and what the camera is looking at.
@@ -116,12 +116,12 @@ export class Camera {
      * @param far_plane_distance 
      */
     constructor(engine: Engine, eye: Eye, field_of_view: number, aspect_ratio: number,  
-        near_plane_distance: number, far_plane_distance: number) {
+        near_plane_distance: number, far_plane_distance: number, global_light_color: Vec4) {
         this.eye = eye;
         this.#projection_matrix = mat4.identity();
         this.#projection_buffer = engine.device.createBuffer({
-            label: "Main camera's projection buffer",
-            size: 64,
+            label: "Main camera's projection and global light buffer",
+            size: 64 + 16,  //  4x4 projection matrix + vec4f color
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
             mappedAtCreation: false
         });
@@ -136,7 +136,7 @@ export class Camera {
         this.set_perspective_projection(engine.device, field_of_view, aspect_ratio, 
             near_plane_distance, far_plane_distance);
 
-        engine.device.queue.writeBuffer(this.#projection_buffer, 0, new Float32Array(this.#projection_matrix));
+        this.set_global_light_color(engine, global_light_color);
     }
 
     /**
@@ -153,6 +153,13 @@ export class Camera {
         //  https://carmencincotti.com/2022-05-02/homogeneous-coordinates-clip-space-ndc/
         mat4.perspective(field_of_view, aspect_ratio, near_plane_distance, far_plane_distance, this.#projection_matrix);
         device.queue.writeBuffer(this.#projection_buffer, 0, new Float32Array(this.#projection_matrix));
+    }
+
+    set_global_light_color(engine: Engine, color: Vec4) {
+        let projection_data: Float32Array = new Float32Array(20);
+        projection_data.set(this.#projection_matrix, 0);
+        projection_data.set(color, 16);
+        engine.device.queue.writeBuffer(this.#projection_buffer, 0, projection_data);
     }
 
     /**

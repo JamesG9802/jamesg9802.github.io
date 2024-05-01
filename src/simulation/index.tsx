@@ -1,10 +1,13 @@
-import { quat, vec3 } from "wgpu-matrix";
+import { Vec4, quat, vec3, vec4 } from "wgpu-matrix";
 import { Engine } from "./engine";
 import { World } from "./world";
 import { Camera, Eye } from "./world/camera";
 import { Entity } from "./world/entity";
 import { Mesh } from "./world/mesh";
 import { Model } from "./world/model";
+import LinkEntity from "./logic/LinkEntity";
+import RingEntity from "./logic/RingEntity";
+import AsteroidEntity from "./logic/AsteroidEntity";
 
 /**
  * A simulation is a class that handles the logic for drawing 3d objects to a given HTML Canvas element.
@@ -35,12 +38,6 @@ export class Simulation {
 
     x: number = 0;
     y: number = 0;
-    left_pressed: boolean = false;
-    right_pressed: boolean = false;
-    up_pressed: boolean = false;
-    down_pressed: boolean = false;
-    left_rotate_pressed: boolean = false;
-    right_rotate_pressed: boolean = false;
 
     /**
      * The engine connecting to the WebGPU API.
@@ -71,17 +68,18 @@ export class Simulation {
     /**
      * Creates and returns a new simulation.
      * @param canvas 
+     * @param clear_color
      * @returns 
      */
-    static async create(canvas: HTMLCanvasElement): Promise<Simulation | undefined> {
-        let engine: Engine | undefined = await Engine.create(canvas);
+    static async create(canvas: HTMLCanvasElement, clear_color: GPUColor): Promise<Simulation | undefined> {
+        let engine: Engine | undefined = await Engine.create(canvas, clear_color);
         if(engine == undefined) {
             console.error("Failed to create simulation.");
             return;
         }
             
         let camera: Camera = new Camera(engine, new Eye(vec3.fromValues(0, 0, 6), vec3.fromValues(0, 0, 1)),
-        Math.PI / 5, 1, .1, 100);
+        Math.PI / 5, 1, .1, 100, vec4.fromValues(1, 1, 1, 1));
         await Mesh.initialize_dictionary();
         let model1 = await Model.load_from_file(engine, "cube");
         let model2 = await Model.load_from_file(engine, "cliff");
@@ -90,11 +88,36 @@ export class Simulation {
             console.error("model is undefined");
             return;
         }
-        let e1 = new Entity(vec3.fromValues(0, 0, 0), quat.fromEuler(0, 0, 0, "xyz"), vec3.fromValues(.125, .125, .125), model1);
-        let e2 = new Entity(vec3.fromValues(1, 2, 4), quat.fromEuler(0, 0, 2 * Math.PI, "xyz"), vec3.fromValues(.1, .1, .1), model2);
+        let e1 = new LinkEntity(vec3.fromValues(0, 0, 0), quat.fromEuler(0, 0, 0, "xyz"), vec3.fromValues(.25, .25, .25), model1);
         
-        let entities: Entity[] = [e1, e2];
+        let entities: Entity[] = [e1];
 
+        //  Rings
+        for(let i = 0; i < 12; i++) {
+            let model = model2.create_instance_copy(engine);
+            const radius = .8;
+            entities.push(
+                new RingEntity(
+                    vec3.fromValues(radius * Math.sin((i / 12) * 2 * Math.PI), radius * Math.cos((i / 12) * 2 * Math.PI), -1), 
+                    quat.fromEuler(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, "xyz"), 
+                    vec3.fromValues(.075, .075, .075),
+                    model
+                )
+            );
+        }
+
+        //  Asteroids
+        for(let i = 0; i < 10; i++) {
+            let model = model2.create_instance_copy(engine);
+            let entity = new AsteroidEntity(
+                vec3.fromValues(Math.random() * 12 - 6, Math.random() * 12 - 6, 3 * Math.random() - 7), 
+                quat.fromEuler(0, 0, 2 * Math.PI, "xyz"), 
+                vec3.fromValues(.2 * Math.random() + .1, .2 * Math.random() + .1, .2 * Math.random() + .1),
+                model
+            );
+            entities.push(entity);
+        }
+        /*
         for(let i = 0; i < 20000; i++) {
             //let model = await Model.load_from_file(engine, Math.random() > 0 ? "cube" : "cliff");
             let model = model1.create_instance_copy(engine);
@@ -111,6 +134,7 @@ export class Simulation {
                     model)
             );
         }
+        */
         let world: World = World.create(camera, entities);
         let simulation: Simulation = new Simulation(engine, world);
         console.log("Successfully created simulation.");
@@ -128,33 +152,22 @@ export class Simulation {
             Math.PI / 5, aspect_ratio, .1, 100);
     }
 
+    set_clear_color(clear_color: GPUColor) {
+        this.engine.set_clear_color(clear_color);
+    }
+
+    set_global_light_color(light_color: Vec4) {
+        this.world.set_global_light_color(this.engine, light_color);
+    }
+
     /**
      * Updates the world.
      */
-    update() {
+    update(mouse_position: [number, number]) {
         let now = new Date().getTime();
-        this.world.update((now - this.#last_time)/1000);
+        let time_delta = (now - this.#last_time)/1000;
+        this.world.update(mouse_position, time_delta);
         this.#last_time = now;
-
-        const radius = 6;
-        
-        if(this.left_pressed)
-            this.x++;
-        if(this.right_pressed)
-            this.x--;
-        if(this.up_pressed)
-            this.y++;
-        if(this.down_pressed)
-            this.y--;
-        if(this.left_pressed || this.right_pressed || this.up_pressed || this.down_pressed)
-        this.world.main_camera.eye.set_position_and_forward(
-            vec3.fromValues(radius*Math.sin(this.x / 64), radius*Math.sin(this.y / 64), radius*Math.cos(this.x / 64)),
-            vec3.subtract(vec3.fromValues(radius*Math.sin(this.x / 64), radius*Math.sin(this.y / 64), radius*Math.cos(this.x / 64)), vec3.fromValues(0,0,0)),
-        );
-        if(this.left_rotate_pressed)
-            this.world.main_camera.eye.forward = vec3.rotateY(this.world.main_camera.eye.forward, vec3.fromValues(0, 0, 0), Math.PI / 64);
-        if(this.right_rotate_pressed)
-            this.world.main_camera.eye.forward = vec3.rotateY(this.world.main_camera.eye.forward, vec3.fromValues(0, 0, 0), -Math.PI / 64);
         
         this.#frame += 1;
         const diff = new Date().getTime() - this.#timeSinceLastFPSCheck;
@@ -170,5 +183,13 @@ export class Simulation {
      */
     render() {
         this.world.render(this.engine);
+    }
+
+    /**
+     * Clean up all information from the simulation.
+     */
+    destroy() {
+        this.engine.destroy();
+        this.world.destroy();
     }
 }

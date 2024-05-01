@@ -1,15 +1,20 @@
 import AppHeader from "components/AppHeader";
 import AppFooter from "components/AppFooter";
-import Home from "Screens/Home";
 
 import "App.css";
+import { GenericComponentProps } from "components/Generic";
 
-function App() {
+/**
+ * Wraps screens to give a consistent site appearance.
+ * @param props
+ * @returns 
+ */
+function App({children}: GenericComponentProps) {
   return (
     <div id="page" className="flex flex-col">
       <div id="content" className="flex flex-col flex-grow">
         <AppHeader/>
-        <Home/>
+        {children}
       </div>
       <AppFooter/>
     </div>

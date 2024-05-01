@@ -1,10 +1,34 @@
 import { Simulation } from "simulation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
+import "./index.css";
+import RingEntity from "simulation/logic/RingEntity";
+import { GenericComponentProps } from "components/Generic";
+import { Vec4, vec4 } from "wgpu-matrix";
+import { Text } from "components/Generic/Text";
+import App from "App";
+import { LinkText } from "components/Generic/Link";
+
+type LinkHoverProps = {
+    text: string,
+    link: string,
+    color: Vec4
+} & GenericComponentProps;
+
 export default function Home() {
     const canvas_ref = useRef<HTMLCanvasElement | null>(null);
+
+    /**
+     * Whether the user explicitly wants WebGPU animation to stop.
+     */
+    const animation_disabled = useRef(false);
+    
+    const [webgpu_supported, set_webgpu_supported] = useState(false);
     const [width, height] = useWindowSize();
     const simulation = useRef<Simulation>();
+    const is_dark_mode = useRef<boolean>(false); 
+    const mouse_position= useRef<[number, number]>([0, 0]);
+
     //  Only used when the simulation first initializes to get the proper canvas height
     //  afterwards the resizer will properly handle the size
     const canvas_width = useRef<number>(1), canvas_height = useRef<number>(1);
@@ -23,62 +47,70 @@ export default function Home() {
         return size;
     }
 
+    /**
+     * If the simulation exists and is not paused, animate.
+     */
     function animate() {
-        if(simulation.current != undefined){
-            simulation.current.update();
+        if(simulation.current != undefined && !animation_disabled.current){
+            simulation.current.update(mouse_position.current);
             simulation.current.render();
         }
         requestAnimationFrame(animate);
     }
+
+    /**
+     * Pass mouse position to the simulation.
+     * @param ev 
+     * @returns 
+     */
+    function update_mouse_position(ev: MouseEvent) {
+        if(!canvas_ref.current) return;
+        let bounding_rect = canvas_ref.current?.getBoundingClientRect();
+        mouse_position.current = [
+            2 * (ev.clientX - bounding_rect.left) / canvas_width.current - 1, 
+            2 * (ev.clientY - bounding_rect.top) / canvas_height.current - 1
+        ];
+    };
 
     /** On initialization start animating. */
     useEffect(() => {
         async function initialize() {
             if(canvas_ref.current == undefined)
                 throw Error("Canvas could not be found.");
-            let new_simulation = await Simulation.create(canvas_ref.current);
+            //  https://stackoverflow.com/a/75495293
+            //  Get the system theme preference
+            const mq = window.matchMedia("(prefers-color-scheme: dark)");
+            if (mq.matches) {
+                is_dark_mode.current = true;
+            }
+            mq.addEventListener("change", (evt) => {
+                is_dark_mode.current = evt.matches;
+                simulation.current?.set_clear_color(is_dark_mode.current ? 
+                    [0.129, 0.114, 0.102, 1] : 
+                    [0.953, 0.949, 1, 1]);
+            });
+
+            let new_simulation = await Simulation.create(canvas_ref.current, 
+                is_dark_mode.current ? 
+                [0.129, 0.114, 0.102, 1] : 
+                [0.953, 0.949, 1, 1]);
             simulation.current = new_simulation;
-            if(simulation.current)
+            if(simulation.current) {
                 simulation.current.resize(canvas_width.current, canvas_height.current);
+                set_webgpu_supported(true);
+            }
             animate();
+            
         }
         initialize();
-        function input(event: KeyboardEvent) {
-            if(simulation.current == undefined) return;
-            if (event.key == "ArrowLeft") {
-                simulation.current.left_pressed = true;
-            }
-            if (event.key == "ArrowRight") {
-                simulation.current.right_pressed = true;
-            }
-            if (event.key == "ArrowUp") {
-                simulation.current.up_pressed = true;
-            }
-            if (event.key == "ArrowDown") {
-                simulation.current.down_pressed = true;
-            }
-            if (event.key == "q") {
-                simulation.current.left_rotate_pressed = true;
-            }
-            if (event.key == "e") {
-                simulation.current.right_rotate_pressed = true;
-            }
-        }
-        function letgo(event: KeyboardEvent) {
-            if(simulation.current == undefined) return;
-            simulation.current.left_pressed = false;
-            simulation.current.right_pressed = false;
-            simulation.current.up_pressed = false;
-            simulation.current.down_pressed = false;
-            simulation.current.left_rotate_pressed = false;
-            simulation.current.right_rotate_pressed = false;
-        }
-        window.addEventListener("keydown", input);
-        window.addEventListener("keyup", letgo);
+
+        canvas_ref.current?.addEventListener('mousemove', update_mouse_position);
+          
         return () => {
-            window.removeEventListener("keydown", input);
-            window.removeEventListener("keyup", letgo);
-        }
+            simulation.current?.destroy();
+            simulation.current = undefined;
+            canvas_ref.current?.removeEventListener('mousemove', update_mouse_position);
+        };
     }, []);
 
     /** On initialization and size change, update the canvas size. */
@@ -98,10 +130,52 @@ export default function Home() {
             }
         }
     }, [canvas_ref, width, height]);
-    
-    return (<>
-      <div className="flex-grow relative">
-        <canvas className="absolute top-0 left-0" id="tutorial" ref={canvas_ref}/>
-      </div>
-    </>);
+
+    function LinkHover({text, link, color}: LinkHoverProps) {
+        return (
+        <LinkText to={link}
+            containerClassName={`
+            bg-l_primary-100/80 dark:bg-d_primary-100/80 
+            p-3 m-3 rounded-full 
+            hover:bg-l_primary-100 hover:dark:bg-l_primary-100`
+            }
+            className="pointer-events-auto cursor-pointer"
+            onMouseOverCapture={(_e) => { 
+                RingEntity.FAST = true;
+                simulation.current?.set_global_light_color(color);
+            }} 
+            /**
+             * In order for the text to not block the canvas, they need to continue passing the mouse event to the canvas.
+             */
+            onMouseMoveCapture={(_e) => {
+                update_mouse_position(_e.nativeEvent);
+            }}
+            onMouseLeave={() => {
+                RingEntity.FAST = false;
+            }}>
+            <Text>{text}</Text>
+        </LinkText>
+        )
+    }
+    return (<App>
+        <div className="flex-grow relative Engine-Container">
+            <canvas className="absolute top-0 left-0" id="tutorial" ref={canvas_ref}/>
+            {
+                webgpu_supported ?
+                <div className="absolute top-0 left-0 pointer-events-none w-full h-full flex flex-row justify-between items-center flex-wrap">
+                    <LinkHover text="About Me" link="aboutme" color={vec4.fromValues(0, 0, 1)}/>
+                    <LinkHover text="Projects" link="projects" color={vec4.fromValues(1, 0, 0)}/>
+                    <LinkHover text="Projects" link="/" color={vec4.fromValues(0, 1, 0)}/>
+                    <LinkHover text="Projects" link="ad" color={vec4.fromValues(1, 0, 1)}/>
+                </div>
+                :
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-auto flex flex-col justify-center items-center">
+                    <Text type="title" className="font-medium text-center mb-4">Computer Scientist</Text>
+                    <Text type="h2" className="font-medium text-center">
+                        Pushing the boundaries of technology and science.
+                    </Text>
+                </div>
+            }
+        </div>
+    </App>);
 }
