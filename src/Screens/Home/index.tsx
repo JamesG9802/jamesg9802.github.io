@@ -12,6 +12,7 @@ import { LinkText } from "components/Generic/Link";
 type LinkHoverProps = {
     text: string,
     link: string,
+    button_number: 1 | 2 | 3 | 4,
     color: Vec4
 } & GenericComponentProps;
 
@@ -131,13 +132,27 @@ export default function Home() {
         }
     }, [canvas_ref, width, height]);
 
-    function LinkHover({text, link, color}: LinkHoverProps) {
+    function LinkHover({text, link, button_number, color}: LinkHoverProps) {
+        //  I hate tailwind 🙄🙄🙄
+        //  It won't bundle the tailwind classes correctly unless I hardcode the stylings.
+        let class_string;
+        switch(button_number) {
+            case 1:
+                class_string = "bg-l_accent1-100/80 dark:bg-d_accent1-100/80 hover:bg-l_accent1-100 hover:dark:bg-d_accent1-100";
+                break;
+            case 2:
+                class_string = "bg-l_accent2-100/80 dark:bg-d_accent2-100/80 hover:bg-l_accent2-100 hover:dark:bg-d_accent2-100";
+                break;
+            case 3:
+                class_string = "bg-l_accent3-100/80 dark:bg-d_accent3-100/80 hover:bg-l_accent3-100 hover:dark:bg-d_accent3-100";
+                break;
+            case 4:
+                class_string = "bg-l_accent4-100/80 dark:bg-d_accent4-100/80 hover:bg-l_accent4-100 hover:dark:bg-d_accent4-100";
+                break;
+        }
         return (
         <LinkText to={link}
-            containerClassName={`
-            bg-l_primary-100/80 dark:bg-d_primary-100/80 
-            p-3 m-3 rounded-full 
-            hover:bg-l_primary-100 hover:dark:bg-l_primary-100`
+            containerClassName={`grow p-3 m-3 rounded-full ${class_string}`
             }
             className="pointer-events-auto cursor-pointer"
             onMouseOverCapture={(_e) => { 
@@ -153,29 +168,28 @@ export default function Home() {
             onMouseLeave={() => {
                 RingEntity.FAST = false;
             }}>
-            <Text>{text}</Text>
+            <Text type="h2">{text}</Text>
         </LinkText>
         )
     }
-    return (<App>
+    return (<App hide_header>
         <div className="flex-grow relative Engine-Container">
-            <canvas className="absolute top-0 left-0" id="tutorial" ref={canvas_ref}/>
-            {
-                webgpu_supported ?
-                <div className="absolute top-0 left-0 pointer-events-none w-full h-full flex flex-row justify-between items-center flex-wrap">
-                    <LinkHover text="About Me" link="aboutme" color={vec4.fromValues(0, 0, 1)}/>
-                    <LinkHover text="Projects" link="projects" color={vec4.fromValues(1, 0, 0)}/>
-                    <LinkHover text="Projects" link="/" color={vec4.fromValues(0, 1, 0)}/>
-                    <LinkHover text="Projects" link="ad" color={vec4.fromValues(1, 0, 1)}/>
+            <canvas className="top-0 left-0" id="tutorial" ref={canvas_ref}/>
+            <div className="absolute top-0 left-0 pointer-events-none w-full h-full flex flex-col">
+                <div className="flex flex-grow-0 flex-col items-center justify-center mt-4">
+                    <Text type="title">James Gaiser</Text>
+                    <Text type="h3">Computer Programmer and Researcher</Text>
                 </div>
-                :
-                <div className="absolute top-0 left-0 w-full h-full pointer-events-auto flex flex-col justify-center items-center">
-                    <Text type="title" className="font-medium text-center mb-4">Computer Scientist</Text>
-                    <Text type="h2" className="font-medium text-center">
-                        Pushing the boundaries of technology and science.
-                    </Text>
+                <div className="flex flex-grow justify-center items-center self-stretch">
+                    <div className="flex flex-grow-0 flex-col justify-center 
+                        md:flex-grow md:flex-row md:justify-between">
+                        <LinkHover text="About Me" link="/aboutme" button_number={1} color={vec4.fromValues(0, 0, 1)}/>
+                        <LinkHover text="Projects" link="/projects" button_number={2} color={vec4.fromValues(1, 0, 0)}/>
+                        <LinkHover text="Contact" link="/contact" button_number={3} color={vec4.fromValues(0, 1, 0)}/>
+                        <LinkHover text="This Website" link="ad" button_number={4} color={vec4.fromValues(1, 0, 1)}/>
+                    </div>
                 </div>
-            }
+            </div>
         </div>
     </App>);
 }

@@ -1,9 +1,10 @@
-import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import { RouteObject, RouterProvider, createBrowserRouter, createHashRouter } from 'react-router-dom'
+import { RouterProvider, createHashRouter } from 'react-router-dom'
 import Home from 'Screens/Home/index.tsx'
 import AboutMe from 'Screens/AboutMe/index.tsx'
+import Contact from 'Screens/Contact/index.tsx'
+import { ThemeProvider, createTheme, useMediaQuery } from '@mui/material'
+import Projects from 'Screens/Projects'
 
 const router = createHashRouter([
     {
@@ -18,10 +19,32 @@ const router = createHashRouter([
     },
     {
         path: "projects",
-        element: <AboutMe key={3}/>,
+        element: <Projects key={3}/>,
+    },
+    {
+        path: "contact",
+        element: <Contact key={4}/>
     }
 ])
 
+const darkTheme = createTheme({ 
+    palette: { mode: 'dark' },
+  });
+const lightTheme = createTheme({
+    ...darkTheme, 
+    palette: { mode: 'light' }
+});
+
+function Main() {
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    const theme = prefersDarkMode ? darkTheme : lightTheme;
+    return (
+    <ThemeProvider theme={theme}>
+        <RouterProvider router={router} />
+    </ThemeProvider>
+    );
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <RouterProvider router={router} />
+    <Main/>
 )
