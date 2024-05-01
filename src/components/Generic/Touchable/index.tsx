@@ -13,7 +13,7 @@ export type TouchableProps = {
 export default function Touchable({style, className, children, onClick, ...props}: TouchableProps) {
     const rippleRef = useRef<TouchRippleActions>(null);
     return (
-        <div onClick={onClick}
+        <span onClick={onClick}
             {...props}
             style={style} 
             className={className != undefined ? "Touchable-Container " + className : "Touchable-Container"}
@@ -32,7 +32,7 @@ export default function Touchable({style, className, children, onClick, ...props
         >
             {children}
             <TouchRipple ref={rippleRef} center={false} />
-        </div>
+        </span>
     )
 
 }

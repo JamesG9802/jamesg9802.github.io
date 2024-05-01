@@ -22,8 +22,17 @@ export default {
       l_secondary: {
         100: "#86B1F3",
       },
-      l_accent: {
-        100: "#938FA3",
+      l_accent1: {
+        100: "#83bcff",
+      },
+      l_accent2: {
+        100: "#e71d36",
+      },
+      l_accent3: {
+        100: "#45cb85",
+      },
+      l_accent4: {
+        100: "#745296",
       },
       //  Dark mode
       d_onBackground: {
@@ -40,8 +49,17 @@ export default {
       d_secondary: {
         100: "#0C3779",
       },
-      d_accent: {
-        100: "#605C70",
+      d_accent1: {
+        100: "#4C4E76",
+      },
+      d_accent2: {
+        100: "#7f2b28",
+      },
+      d_accent3: {
+        100: "#32583F",
+      },
+      d_accent4: {
+        100: "#493754",
       },
     },
     extend: {},
