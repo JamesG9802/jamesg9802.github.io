@@ -1,5 +1,5 @@
 import { Engine } from "simulation/engine";
-import { ModelPipeline } from "simulation/engine/pipelines/model";
+import { ModelPipeline } from "simulation/engine/webgpu/pipelines/model";
 import { Mesh } from "simulation/world/mesh";
 import { Mat3, Mat4, } from "wgpu-matrix";
 import { ModelBuffer } from "./model_buffer";

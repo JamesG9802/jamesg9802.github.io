@@ -50,24 +50,27 @@ export class ModelPipeline {
     instance_pipeline: GPURenderPipeline;
 
     /**
+     * The clear color of the pipelines.
+     */
+    clear_color: GPUColor;
+
+    /**
      * Creates a new Model Pipeline. Use `create()` instead.
-     * @param device the GPU device
-     * @param context the canvas's context
-     * @param bind_group_layout the layout for the model pipeline
-     * @param canvas_format the format of the target canvas
      */
     constructor(
         depth_texture: GPUTexture,
         multisampling_texture: GPUTexture,
         multisampling_view: GPUTextureView,
         unique_pipeline: GPURenderPipeline,
-        instance_pipeline: GPURenderPipeline
+        instance_pipeline: GPURenderPipeline,
+        clear_color: GPUColor
     ) {
         this.#depth_texture = depth_texture;
         this.#multisampling_texture = multisampling_texture;
         this.#multisampling_view = multisampling_view;
         this.unique_pipeline = unique_pipeline;
         this.instance_pipeline = instance_pipeline;
+        this.clear_color = clear_color;
     }
     
     /**
@@ -145,7 +148,7 @@ export class ModelPipeline {
 
         //  Set up the bind group layouts 
         const unique_bind_group_layout: GPUBindGroupLayout[] = [
-            device.createBindGroupLayout({  //  group 0 - projection matrix
+            device.createBindGroupLayout({  //  group 0 - projection matrix + global light
                 entries: [{
                     binding: 0,
                     visibility: GPUShaderStage.VERTEX,
@@ -251,10 +254,11 @@ export class ModelPipeline {
      * @param device 
      * @param context 
      * @param canvas_format 
+     * @param clear_color
      * @returns 
      */
     static create(device: GPUDevice, context: GPUCanvasContext, 
-        canvas_format: GPUTextureFormat
+        canvas_format: GPUTextureFormat, clear_color: GPUColor
     ): ModelPipeline {
         //  Set up the depth texture
         const depth_texture = ModelPipeline.#create_depth_texture(device, context);
@@ -270,7 +274,8 @@ export class ModelPipeline {
             multisampling_texture,
             multisampling_view,
             unique_pipeline,
-            instance_pipeline
+            instance_pipeline,
+            clear_color
         );
     }
 
@@ -296,6 +301,10 @@ export class ModelPipeline {
         this.#multisampling_view = this.#multisampling_texture.createView();
     }
 
+    set_clear_color(clear_color: GPUColor) {
+        this.clear_color = clear_color;
+    }
+
     /**
      * Creates a command encoder for the unique render pass to be sent to.
      * @param device 
@@ -308,7 +317,7 @@ export class ModelPipeline {
                 resolveTarget: context.getCurrentTexture().createView(),
                 loadOp: "clear",
                 storeOp: "store",
-                clearValue: { r: 0, g: 0, b: 0, a: 1 }
+                clearValue: this.clear_color
             }],
             depthStencilAttachment: {
                 view: this.#depth_texture.createView(),
@@ -344,7 +353,7 @@ export class ModelPipeline {
                 resolveTarget: context.getCurrentTexture().createView(),
                 loadOp: "load",    //  because instances are drawn after models, they need to store the previous view
                 storeOp: "store",
-                clearValue: { r: 0, g: 0, b: 0, a: 1 }
+                clearValue: this.clear_color
             }],
             depthStencilAttachment: {
                 view: this.#depth_texture.createView(),
@@ -423,5 +432,10 @@ export class ModelPipeline {
         this.#instance_render_pass.setIndexBuffer(indices.buffer, "uint32", indices.offset, indices.size);
 
         this.#instance_render_pass.drawIndexedIndirect(model.uniform_buffer.indirect_buffer, 0);
+    }
+
+    destroy() {
+        this.#depth_texture.destroy();
+        this.#multisampling_texture.destroy();
     }
 }

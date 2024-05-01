@@ -1,6 +1,7 @@
 import { Engine } from "simulation/engine";
 import { Camera } from "./camera";
 import { Entity } from "./entity";
+import { Vec4 } from "wgpu-matrix";
 
 /**
  * A world is the container for all events in the simulation. Entities are contained in the world
@@ -45,9 +46,9 @@ export class World {
      * Updates all entities with the time delta.
      * @param time_delta the number of milliseconds since the last update
      */
-    update(time_delta: number) {
+    update(mouse_position: [number, number], time_delta: number) {
         for(let i = 0; i < this.entities.length; i++) {
-            this.entities[i].update(time_delta);
+            this.entities[i].update(mouse_position, time_delta);
         }
     }
 
@@ -92,6 +93,17 @@ export class World {
         //  After rendering, we need to set the view_updated back to false to track if any changes
         //  were made in the next update
         this.main_camera.eye.updated_view = false;
+    }
+
+    set_global_light_color(engine: Engine, color: Vec4) {
+        this.main_camera.set_global_light_color(engine, color);
+    }
+
+    destroy() {
+        this.main_camera.destroy();
+        for(let i = 0; i < this.entities.length; i++) {
+            this.entities[i].destroy();
+        }
     }
 }
 

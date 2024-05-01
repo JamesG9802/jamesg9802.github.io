@@ -1,10 +1,10 @@
-import { ModelPipeline } from "simulation/world/model";
+import { ModelPipeline } from "./pipelines/model";
 
 /**
  * The engine handles all connections with the WebGPU API. It also holds the pipelines for rendering
  * objects to the screen.
  */
-export class Engine {
+export class WebGPUEngine {
     /**
      * The adapter represents the physical GPU.
      */
@@ -42,13 +42,21 @@ export class Engine {
     }
 
     /**
+     * True if WebGPU is supported.
+     * @returns 
+     */
+    static is_supported(): boolean {
+        return navigator.gpu != null && navigator.gpu != undefined;
+    }
+
+    /**
      * Creates and returns a Promise containing a new Engine. Returns undefined on failure.
      * @param canvas 
      * @returns 
      */
-    static async create(canvas: HTMLCanvasElement, clear_color: GPUColor): Promise<Engine | undefined> {
+    static async create(canvas: HTMLCanvasElement, clear_color: GPUColor): Promise<WebGPUEngine | undefined> {
         //  Get the adapter and device
-        if(!navigator.gpu)
+        if(!WebGPUEngine.is_supported())
             throw Error("WebGPU not supported.");
         const adapter = await navigator.gpu.requestAdapter();
         if (!adapter)
@@ -69,7 +77,7 @@ export class Engine {
         //  Create the pipeline responsible for rendering models.
         const model_pipeline: ModelPipeline = ModelPipeline.create(device, context, canvasFormat, clear_color);
 
-        let engine: Engine = new Engine(
+        let engine: WebGPUEngine = new WebGPUEngine(
             adapter,
             device,
             context,

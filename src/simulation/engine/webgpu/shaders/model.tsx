@@ -12,14 +12,16 @@ export function get_model_shader(for_unique: boolean) {
     `struct VertexOut {
         @builtin(position) position : vec4f,
         @location(1) normal : vec3f,
-        @location(2) eye_coords : vec3f
+        @location(2) eye_coords : vec3f,
+        @location(3) light_color: vec4f
     }`
     :
     `struct VertexOut {
         @builtin(position) position : vec4f,
         @location(0) @interpolate(flat) i_index: u32,
         @location(1) normal : vec3f,
-        @location(2) eye_coords : vec3f
+        @location(2) eye_coords : vec3f,
+        @location(3) light_color: vec4f
     }`;
     const model_bindings = for_unique ?
     `@group(1) @binding(0) var<uniform> model_data: ModelData;`
@@ -65,13 +67,15 @@ export function get_model_shader(for_unique: boolean) {
     `output.position = projection_data.projection * eye_coords;
     //  all models are guaranteed to have normalized normals
     output.normal = normal;
-    output.eye_coords = eye_coords.xyz/eye_coords.w;`
+    output.eye_coords = eye_coords.xyz/eye_coords.w;
+    output.light_color = projection_data.global_color;`
     :
     `output.i_index = i_index;
     output.position = projection_data.projection * eye_coords;
     //  all models are guaranteed to have normalized normals
     output.normal = normal;
-    output.eye_coords = eye_coords.xyz/eye_coords.w;`;
+    output.eye_coords = eye_coords.xyz/eye_coords.w;
+    output.light_color = projection_data.global_color;`;
 
     const vertex_arguments = for_unique ?
     `@location(0) pos: vec3f,
@@ -85,11 +89,13 @@ export function get_model_shader(for_unique: boolean) {
 
     const fragment_arguments = for_unique ?
     `@location(1) normal: vec3f, 
-    @location(2) eye_coords: vec3f`
+    @location(2) eye_coords: vec3f,
+    @location(3) light_color: vec4f`
     :
     `@location(0) @interpolate(flat) i_index: u32,
     @location(1) normal: vec3f, 
-    @location(2) eye_coords: vec3f`;
+    @location(2) eye_coords: vec3f,
+    @location(3) light_color: vec4f`;
 
     const code = `
     ${vertex_out}
@@ -99,6 +105,7 @@ export function get_model_shader(for_unique: boolean) {
     }
     struct ProjectionData {
         projection: mat4x4f,    //  size 64, offset 0
+        global_color: vec4f     //  size 16, offset 64
     }
     @group(0) @binding(0) var<uniform> projection_data: ProjectionData;
     ${model_bindings}
@@ -133,7 +140,7 @@ export function get_model_shader(for_unique: boolean) {
             var color = 0.8*dot(L,N) * vec3f(1,1,1);  // diffuse reflection
                 // constant multiples on colors are to avoid over-saturating the total color
             if (dot(R,V) > 0.0) {  // add in specular reflection
-                color += 0.4*pow(dot(R,V),4) * vec3f(1,0,0);
+                color += 4*pow(dot(R,V),4) * light_color.xyz;
             }
             return vec4f(color,1.0);
         }

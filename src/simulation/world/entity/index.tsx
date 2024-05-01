@@ -38,8 +38,10 @@ export class Entity {
      */
     #scale: Vec3;
     
-    starting_height: number;
-    time: number; 
+    /**
+     * Entities may implement on_update for custom update logic.
+     */
+    #on_update?: (entity: Entity, mouse_positiob: [number, number], time_delta: number) => void;
 
     /**
      * Creates and returns a new Entity.
@@ -47,8 +49,11 @@ export class Entity {
      * @param rotation 
      * @param scale 
      * @param model 
+     * @param on_update
      */
-    constructor(position: Vec3, rotation: Quat, scale: Vec3, model: Model) {
+    constructor(position: Vec3, rotation: Quat, scale: Vec3, model: Model, 
+        on_update?: (entity: Entity, mouse_position: [number, number], time_delta: number) => void
+    ) {
         this.model = model;
     
         //  Set to true so that on the first render, the entity will write its uniform into the buffer
@@ -58,10 +63,10 @@ export class Entity {
         this.#position = position;
         this.#rotation = rotation;
         this.#scale = scale;
+
+        this.#on_update = on_update;
         
         this.#update_transform_matrix();
-        this.starting_height = position[1];
-        this.time = Math.random() * 10;
     }
 
     /**
@@ -103,9 +108,11 @@ export class Entity {
      * Updates the entity based on time_delta.
      * @param time_delta 
      */
-    update(time_delta: number) {
-        this.time += time_delta;
-        this.position = vec3.fromValues(this.position[0], this.starting_height + Math.cos(this.time), this.position[2]);
+    update(mouse_position: [number, number], time_delta: number) {
+    //    this.time += time_delta;
+    //    this.position = vec3.fromValues(this.position[0], this.starting_height + Math.cos(this.time), this.position[2]);
+        if(this.#on_update)
+            this.#on_update(this, mouse_position, time_delta);
     }
 
     /**
@@ -146,6 +153,7 @@ export class Entity {
     get position(): Vec3 { return this.#position; }
     get rotation(): Quat { return this.#rotation; }
     get scale(): Vec3 { return this.#scale; }
+
     set position(value: Vec3) { 
         this.#transform_changed = true;
         this.#position = value; 
@@ -158,4 +166,9 @@ export class Entity {
         this.#transform_changed = true;
         this.#scale = value; 
     }
+
+    /**
+     * The direction vector the entity is facing in.
+     */
+    get forward(): Vec3 { return vec3.transformQuat(vec3.fromValues(0, 0, 1), this.rotation)}
 }
