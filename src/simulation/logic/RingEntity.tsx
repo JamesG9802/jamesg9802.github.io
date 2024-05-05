@@ -1,4 +1,3 @@
-import { RingVolume } from "@mui/icons-material";
 import { Entity } from "simulation/world/entity";
 import { Model } from "simulation/world/model";
 import { Quat, Vec3, quat, vec2, vec3 } from "wgpu-matrix";
@@ -14,7 +13,7 @@ export default class RingEntity extends Entity {
     static speed: number = min_speed;
     time?: number = 0
     radius?: number = 1
-    static #on_update(entity: RingEntity, mouse_position: [number, number], time_delta: number) {
+    static #on_update(entity: RingEntity, _mouse_position: [number, number], time_delta: number) {
         if(entity.time == undefined)
             entity.time = 0;
         if(entity.radius == undefined)

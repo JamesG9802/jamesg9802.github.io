@@ -1,5 +1,5 @@
 import { Engine } from 'simulation/engine';
-import { Mat4, Vec3, Vec4, mat4, vec3, vec4 } from 'wgpu-matrix';
+import { Mat4, Vec3, Vec4, mat4, vec3 } from 'wgpu-matrix';
 
 /**
  * Where the camera is looking from and what the camera is looking at.

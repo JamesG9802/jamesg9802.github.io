@@ -1,4 +1,4 @@
-import { ImageList, ImageListItem, ImageListItemBar, TextField } from "@mui/material";
+import { ImageList, ImageListItem, ImageListItemBar } from "@mui/material";
 import App from "App";
 import { LinkText } from "components/Generic/Link";
 import { Text } from "components/Generic/Text";
@@ -6,7 +6,7 @@ import { skills } from "config/data";
 import { useState } from "react";
 
 export default function AboutMe() {
-  const [filter, set_filter] = useState("");
+  const [filter, _set_filter] = useState("");
 
   return (
     <App current_page="About Me">

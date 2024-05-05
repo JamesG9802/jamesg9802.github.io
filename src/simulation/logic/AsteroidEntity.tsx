@@ -6,7 +6,7 @@ export default class AsteroidEntity extends Entity {
     x_speed?: number
     y_speed?: number
 
-    static #on_update(entity: AsteroidEntity, mouse_position: [number, number], time_delta: number) {
+    static #on_update(entity: AsteroidEntity, _mouse_position: [number, number], time_delta: number) {
         if(entity.x_speed == undefined || entity.y_speed == undefined) {
             entity.x_speed = 4 * Math.random() - 2;
             entity.y_speed = 4 * Math.random() - 2;

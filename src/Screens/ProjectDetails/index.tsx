@@ -2,7 +2,7 @@ import App from "App";
 import { Text } from "components/Generic/Text";
 import Touchable from "components/Generic/Touchable";
 import { Project, projects } from "config/data";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 //  Needed for tailwind to bundle properly

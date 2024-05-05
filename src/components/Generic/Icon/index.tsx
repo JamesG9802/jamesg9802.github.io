@@ -1,4 +1,3 @@
-import { GenericComponentProps } from "components/Generic";
 import "./index.css";
 import Touchable, { TouchableProps } from "components/Generic/Touchable";
 

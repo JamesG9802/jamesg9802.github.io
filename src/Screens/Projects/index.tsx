@@ -1,4 +1,4 @@
-import { Chip, ImageList, ImageListItem, ImageListItemBar, Modal } from "@mui/material";
+import { Chip, Modal } from "@mui/material";
 import App from "App";
 import { Text } from "components/Generic/Text";
 import Touchable from "components/Generic/Touchable";

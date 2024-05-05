@@ -24,7 +24,7 @@ export default function Home() {
      */
     const animation_disabled = useRef(false);
     
-    const [webgpu_supported, set_webgpu_supported] = useState(false);
+    const [_webgpu_supported, set_webgpu_supported] = useState(false);
     const [width, height] = useWindowSize();
     const simulation = useRef<Simulation>();
     const is_dark_mode = useRef<boolean>(false); 

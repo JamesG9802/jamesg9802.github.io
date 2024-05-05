@@ -1,7 +1,6 @@
 import TouchRipple, { TouchRippleActions } from '@mui/material/ButtonBase/TouchRipple';
 import "./index.css"
 import { useRef } from 'react';
-import { GenericComponentProps } from 'components/Generic';
 
 export type TouchableProps = {
     onClick?: React.MouseEventHandler<HTMLElement>;
