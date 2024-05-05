@@ -2,30 +2,26 @@ import { ImageList, ImageListItem, ImageListItemBar, TextField } from "@mui/mate
 import App from "App";
 import { LinkText } from "components/Generic/Link";
 import { Text } from "components/Generic/Text";
-import skills from "config/data";
+import { skills } from "config/data";
 import { useState } from "react";
 
 export default function AboutMe() {
   const [filter, set_filter] = useState("");
 
   return (
-    <App>
+    <App current_page="About Me">
       <div className="mt-8 flex flex-col">
         <div className="self-center max-w-4xl">
           <Text type="h1">Problem Solver and Researcher</Text>
-          <Text className="text-l_onBackground-200 dark:text-d_onBackground-200 italic mb-8">Last updated 5/1/2024</Text>
-          <Text>As a child, I always had a wild imagination. Programming—along with writing fictional stories—has always been my main outlet to share my creativity with others. Deconstructing difficult problems and designing an elegant solution is an extremely satisfying process that will never grow old. You can check out my work <LinkText className="inline-flex" to="/projects">here</LinkText> or look at my skills if you want to collaborate on a research project.
+          {/* <Text className="text-l_onBackground-200 dark:text-d_onBackground-200 italic mb-8">Last updated 5/1/2024</Text> */}
+          <Text>Programming—along with writing fictional stories—has always been my main outlet to share my creativity with others. There is nothing more satisfying than facing down an insurmountable problem and then designing an elegant solution. I am always looking for opportunities to hone my skills and learn cutting-edge technologies. You can check out my work <LinkText className="inline-flex" to="/projects">here</LinkText> or look at my skills if you want to collaborate on a research project.
           </Text>
-          <TextField 
-            className="self-start"
-            variant="standard"
-            label="Search for skills"
-            value={filter}
-            onChange={(e) => {
-              set_filter(e.currentTarget.value);
-            }}/>
         </div>
-        <ImageList sx={{}} className="flex-grow self-center grid-cols-1 sm:grid-cols-2 min-[800px]:grid-cols-3" cols={0}>
+        <ImageList 
+          className="flex-grow self-center
+            grid-cols-1 min-[500px]:grid-cols-2 md:grid-cols-3 min-[850px]:grid-cols-4 lg:grid-cols-5 mt-4" 
+          cols={0}
+          gap={8}>
           {
             skills.map((skill, index) => {
               if(!skill.name.toLowerCase().includes(filter.toLowerCase()))
@@ -33,7 +29,11 @@ export default function AboutMe() {
               return (
                 <ImageListItem
                   key={index}
-                  className="w-64 h-64 aspect-square"
+                  className="w-48 h-48 aspect-square Flip"
+                  style={{
+                    animationDelay: Math.random() > .3333 ? 100 + "ms" :
+                    Math.random() > .5 ? 200 + "ms" : 300 + "ms"
+                  }}
                 >
                   <img
                     src={skill.image_path}

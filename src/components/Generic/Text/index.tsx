@@ -4,7 +4,7 @@ export type TextProps = {
     /**
      * The type of text which affects the styling. Defaults to normal if no type is specified.
      */
-    type?: "normal" | "title" | "h1" | "h2" | "h3"
+    type?: "normal" | "title" | "h0" | "h1" | "h2" | "h3"
     
     text?: string
 } & GenericComponentProps;
@@ -24,6 +24,9 @@ export function Text({type, style, className, text, children}: TextProps) {
             break;
         case "title":
             class_styling = "font-bold text-6xl";
+            break;
+        case "h0":
+            class_styling = "font-bold text-4xl";
             break;
         case "h1":
             class_styling = "font-bold text-2xl";

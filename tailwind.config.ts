@@ -17,13 +17,16 @@ export default {
         200: "#e2e1ed",
       },
       l_primary: {
-        100: "#CCDAD1",
+        100: "#90D7FF",
+      },
+      l_onPrimary: {
+        100: "#211d1a"
       },
       l_secondary: {
-        100: "#86B1F3",
+        100: "#CE8964",
       },
       l_accent1: {
-        100: "#83bcff",
+        100: "#6F7AF3",
       },
       l_accent2: {
         100: "#e71d36",
@@ -44,10 +47,13 @@ export default {
         200: "#332d29",
       },
       d_primary: {
-        100: "#243229",
+        100: "#004770",
       },
-      d_secondary: {
-        100: "#0C3779",
+      d_onPrimary: {
+        100: "#f3f2ff",
+      },
+      d_secondary: {        
+        100: "#9B5631",
       },
       d_accent1: {
         100: "#4C4E76",

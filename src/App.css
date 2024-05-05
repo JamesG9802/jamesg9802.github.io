@@ -37,3 +37,27 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+.Flip {
+    -webkit-animation: flip 1s;
+    animation: flip 1s;
+    animation-fill-mode: forwards;
+    transform: rotateY(90deg);
+}
+
+@-webkit-keyframes flip {
+    from {
+        transform: rotateY(90deg)
+    }
+    to {
+        transform: rotateY(0deg)
+    }
+}
+@keyframes flip {
+    from {
+        transform: rotateY(90deg)
+    }
+    to {
+        transform: rotateY(0deg)
+    }
+}

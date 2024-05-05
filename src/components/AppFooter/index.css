@@ -1,5 +1,7 @@
 #footer {
-    @apply bg-l_secondary-100 dark:bg-d_secondary-100;
+    @apply bg-l_background-200 dark:bg-d_background-200;
+    @apply text-l_onBackground-200 dark:text-d_onBackground-200;
     @apply flex-grow-0;
     @apply py-6;
+    @apply rounded-md;
 }

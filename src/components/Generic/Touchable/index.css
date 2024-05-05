@@ -7,5 +7,5 @@
     border-radius: 1000px;
 }
 .Touchable-Container:hover {
-    @apply bg-l_onBackground-100/5 dark:bg-d_onBackground-100/5;
+    @apply bg-l_onBackground-100/20 dark:bg-d_onBackground-100/20;
 }

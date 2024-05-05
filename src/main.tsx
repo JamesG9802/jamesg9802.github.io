@@ -5,6 +5,7 @@ import AboutMe from 'Screens/AboutMe/index.tsx'
 import Contact from 'Screens/Contact/index.tsx'
 import { ThemeProvider, createTheme, useMediaQuery } from '@mui/material'
 import Projects from 'Screens/Projects'
+import ProjectDetails from 'Screens/ProjectDetails'
 
 const router = createHashRouter([
     {
@@ -24,6 +25,10 @@ const router = createHashRouter([
     {
         path: "contact",
         element: <Contact key={4}/>
+    },
+    {
+        path: "projects/:index",
+        element: <ProjectDetails key={5}/>
     }
 ])
 

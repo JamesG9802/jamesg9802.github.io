@@ -5,6 +5,7 @@ import "App.css";
 import { GenericComponentProps } from "components/Generic";
 
 export type AppProps = {
+  current_page: "Home" | "About Me" | "Projects" | "Contact"
   hide_header?: boolean
   hide_footer?: boolean
 } & GenericComponentProps;
@@ -14,11 +15,11 @@ export type AppProps = {
  * @param props
  * @returns 
  */
-function App({hide_header, hide_footer, children}: AppProps) {
+function App({current_page, hide_header, hide_footer, children}: AppProps) {
   return (
     <div id="page" className="flex flex-col">
       <div id="content" className="flex flex-col flex-grow">
-        {!hide_header && <AppHeader/>}
+        {!hide_header && <AppHeader current_page={current_page}/>}
         {children}
       </div>
       {!hide_footer && <AppFooter/>}
