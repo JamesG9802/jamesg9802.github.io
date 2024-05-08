@@ -152,6 +152,7 @@ export default function Home() {
         }
         return (
         <LinkText to={link}
+            target={button_number == 4 ? "_blank" : "_self"}
             containerClassName={`grow p-3 m-3 rounded-full flex flex-row justify-center ${class_string}`
             }
             className="pointer-events-auto cursor-pointer"
@@ -192,10 +193,30 @@ export default function Home() {
                 <div className="flex flex-grow justify-center items-center self-stretch">
                     <div className="flex flex-grow-0 flex-col justify-center 
                         md:flex-grow md:flex-row md:justify-between">
-                        <LinkHover text="About Me" link="/aboutme" button_number={1} color={vec4.fromValues(0, 0, 1)}/>
-                        <LinkHover text="Projects" link="/projects" button_number={2} color={vec4.fromValues(1, 0, 0)}/>
-                        <LinkHover text="Contact" link="/contact" button_number={3} color={vec4.fromValues(0, 1, 0)}/>
-                        <LinkHover text="Source Code" link="https://github.com/JamesG9802/jamesg9802.github.io" button_number={4} color={vec4.fromValues(1, 0, 1)}/>
+                        <LinkHover 
+                            text="About Me" 
+                            link="/aboutme" 
+                            button_number={1} 
+                            color={vec4.fromValues(0, 0, 1)}
+                        />
+                        <LinkHover 
+                            text="Projects" 
+                            link="/projects" 
+                            button_number={2} 
+                            color={vec4.fromValues(1, 0, 0)}
+                        />
+                        <LinkHover 
+                            text="Contact" 
+                            link="/contact" 
+                            button_number={3} 
+                            color={vec4.fromValues(0, 1, 0)}
+                        />
+                        <LinkHover 
+                            text="Source Code" 
+                            link="https://github.com/JamesG9802/jamesg9802.github.io" 
+                            button_number={4} 
+                            color={vec4.fromValues(1, 0, 1)}
+                        />
                     </div>
                 </div>
             </div>

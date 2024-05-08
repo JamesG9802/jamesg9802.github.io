@@ -1,24 +1,18 @@
-import { ReactNode, useState } from "react";
+import { useState } from "react";
 import { Drawer} from "@mui/material";
 import { Text } from "components/Generic/Text";
 
 import Github from "assets/Github";
 import LinkedIn from "assets/LinkedIn";
-import Email from "assets/Email";
 import Icon from "components/Generic/Icon";
 import { LinkText } from "components/Generic/Link";
 import MenuIcon from "assets/Menu";
+import { Link } from "react-router-dom";
+import MailObfuscation from "components/Mail";
 
 export type AppProps = {
     current_page: "Home" | "About Me" | "Projects" | "Contact"
 };
-
-/**
- * Shorthand for a tag with styling.
- */
-export function A({href, children}: {href: string, children?: ReactNode}) {
-    return <a className="inline-flex" target="_blank" rel="noreferrer" href={href}>{children}</a>
-}
 
 export default function AppHeader({current_page}: AppProps) {
     function SmallHeader() {
@@ -51,9 +45,9 @@ export default function AppHeader({current_page}: AppProps) {
                         </Text>
                     </LinkText>
                     <div className="flex flex-row justify-between">
-                        <Icon><A href="https://github.com/JamesG9802"><Github/></A></Icon>
-                        <Icon><A href="https://www.linkedin.com/in/james-g-01466b286/" ><LinkedIn/></A></Icon>
-                        <Icon><A href="mailto:***REMOVED***"><Email/></A></Icon>
+                        <Link target="_blank" rel="noreferrer" to="https://github.com/JamesG9802"><Icon><Github/></Icon></Link>
+                        <Link target="_blank" rel="noreferrer" to="https://www.linkedin.com/in/james-g-01466b286/"><Icon><LinkedIn/></Icon></Link>
+                        <MailObfuscation/>
                     </div>
                 </div>
             </Drawer>
@@ -85,9 +79,9 @@ export default function AppHeader({current_page}: AppProps) {
                 </LinkText>
             </div>
             <div className="flex flex-row items-center space-x-4">
-                <Icon><A href="https://github.com/JamesG9802"><Github/></A></Icon>
-                <Icon><A href="https://www.linkedin.com/in/james-g-01466b286/" ><LinkedIn/></A></Icon>
-                <Icon><A href="mailto:***REMOVED***"><Email/></A></Icon>
+                <Link target="_blank" rel="noreferrer" to="https://github.com/JamesG9802"><Icon><Github/></Icon></Link>
+                <Link target="_blank" rel="noreferrer" to="https://www.linkedin.com/in/james-g-01466b286/"><Icon><LinkedIn/></Icon></Link>
+                <MailObfuscation/>
             </div>
         </div>);
     }

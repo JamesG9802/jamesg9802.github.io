@@ -11,8 +11,8 @@ export default function AboutMe() {
   return (
     <App current_page="About Me">
       <div className="mt-8 flex flex-col">
-        <div className="self-center max-w-4xl">
-          <Text type="h1">Problem Solver and Researcher</Text>
+        <div className="self-center w-full max-w-4xl pb-8">
+          <Text type="h0">Problem Solver and Researcher</Text>
           {/* <Text className="text-l_onBackground-200 dark:text-d_onBackground-200 italic mb-8">Last updated 5/1/2024</Text> */}
           <Text>Programming—along with writing fictional stories—has always been my main outlet to share my creativity with others. There is nothing more satisfying than facing down an insurmountable problem and then designing an elegant solution. I am always looking for opportunities to hone my skills and learn cutting-edge technologies. You can check out my work <LinkText className="inline-flex" to="/projects">here</LinkText> or look at my skills if you want to collaborate on a research project.
           </Text>

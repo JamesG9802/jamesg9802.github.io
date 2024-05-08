@@ -1,3 +1,4 @@
+import { Chip } from "@mui/material";
 import App from "App";
 import { Text } from "components/Generic/Text";
 import Touchable from "components/Generic/Touchable";
@@ -62,15 +63,27 @@ export default function ProjectDetails() {
             </div>
             <Text type="h1" className="text-center font-normal">{project.short_description}</Text>
           </div>
-          <div className="flex flex-row self-center w-1/2 
+          <div className="flex flex-wrap self-center w-full flex-col space-y-2 items-center md:w-1/2 md:flex-row md:space-y-0 md:items-start
           py-4">
-            <div className="w-1/2">
+            <div className="w-1/3">
               <Text type="h2" className="text-center text-l_accent1-100 dark:text-d_accent1-100">Project Owner</Text>
               <Text className="text-center font-bold">{project.owner}</Text>
             </div>
-            <div className="w-1/2">
+            <div className="w-1/3">
               <Text type="h2" className="text-center text-l_accent1-100 dark:text-d_accent1-100">Timeframe</Text>
               <Text className="text-center font-bold">{project.date_range}</Text>
+            </div>
+            <div className="w-1/3">
+              <Text type="h2" className="text-center text-l_accent1-100 dark:text-d_accent1-100">Technologies</Text>
+              {
+                project.technologies.map((technology, index) => {
+                  return <Chip key={index}
+                    label={<Text>{technology}</Text>} 
+                    variant="filled"
+                    className="m-1"
+                  />
+                })
+              }
             </div>
           </div>
           <div className="px-12 md:px-32">
@@ -84,7 +97,7 @@ export default function ProjectDetails() {
                 {
                   Number(index) > 0 && 
                   <Link to={`/projects/${Number(index)-1}`}>
-                    <Touchable className="p-4">
+                    <Touchable className="p-4" onClick={()=>{window.scrollTo(0, 0)}}>
                         <Text className="select-none">
                           {`Previous: ${projects[Number(index) - 1].name}`}
                         </Text>
@@ -96,7 +109,7 @@ export default function ProjectDetails() {
               {
                   Number(index) < projects.length - 1 && 
                   <Link to={`/projects/${Number(index) + 1}`}>
-                      <Touchable className="p-4">
+                      <Touchable className="p-4" onClick={()=>{window.scrollTo(0, 0)}}>
                           <Text className="select-none">
                             {`Next: ${projects[Number(index) + 1].name}`}
                           </Text>
