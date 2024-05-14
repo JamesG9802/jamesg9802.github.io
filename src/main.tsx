@@ -34,6 +34,21 @@ const router = createHashRouter([
 
 const darkTheme = createTheme({ 
     palette: { mode: 'dark' },
+    typography: {
+        fontFamily: [
+            "Open Sans",
+            "Roboto",
+            "Helvetica",
+            "Arial",
+            "sans-serif",
+            "ui-sans-serif",
+            "system-ui",
+            "Apple Color Emoji",
+            "Segoe UI Emoji",
+            "Segoe UI Symbol",
+            "Noto Color Emoji"
+        ].join(',')
+    }
   });
 const lightTheme = createTheme({
     ...darkTheme, 

@@ -9,9 +9,26 @@ import { LinkText } from "components/Generic/Link";
 import MenuIcon from "assets/Menu";
 import { Link } from "react-router-dom";
 import MailObfuscation from "components/Mail";
+import { Page } from "App";
+
+type HeaderLinkTextProps = {
+    text: string,
+    page: Page,
+    link: string,
+    current_page: Page
+}
+function HeaderLinkText({text, page, link, current_page}: HeaderLinkTextProps) {
+    return (
+        <LinkText containerClassName="p-2" to={link}>
+            <Text type="h3" className={page == current_page ? "underline" : "font-semibold"}>
+                {text}
+            </Text>
+        </LinkText>
+    );
+}
 
 export type AppProps = {
-    current_page: "Home" | "About Me" | "Projects" | "Contact"
+    current_page: Page
 };
 
 export default function AppHeader({current_page}: AppProps) {
@@ -24,26 +41,10 @@ export default function AppHeader({current_page}: AppProps) {
             </div>
             <Drawer open={open} onClose={()=>{setOpen(false)}}>
                 <div className="flex grow flex-col justify-start items-center px-5 Default-Style-Container">
-                    <LinkText containerClassName="p-4" to="/">
-                        <Text type="h3" className={current_page == "Home" ? "underline" : ""}>
-                            Home
-                        </Text>
-                    </LinkText>
-                    <LinkText containerClassName="p-4" to="/aboutme">
-                        <Text type="h3" className={current_page == "About Me" ? "underline" : ""}>
-                            About Me
-                        </Text>
-                    </LinkText>
-                    <LinkText containerClassName="p-4" to="/projects">
-                        <Text type="h3" className={current_page == "Projects" ? "underline" : ""}>
-                            Projects
-                        </Text>
-                    </LinkText>
-                    <LinkText containerClassName="p-4" to="/contact">
-                        <Text type="h3" className={current_page == "Projects" ? "underline" : ""}>
-                            Contact
-                        </Text>
-                    </LinkText>
+                    <HeaderLinkText text="James Gaiser" page="Home" current_page={current_page} link="/"/>
+                    <HeaderLinkText text="About Me" page="About Me" current_page={current_page} link="/aboutme"/>
+                    <HeaderLinkText text="Projects" page="Projects" current_page={current_page} link="/projects"/>
+                    <HeaderLinkText text="Contact" page="Contact" current_page={current_page} link="/contact"/>
                     <div className="flex flex-row justify-between">
                         <Link target="_blank" rel="noreferrer" to="https://github.com/JamesG9802"><Icon><Github/></Icon></Link>
                         <Link target="_blank" rel="noreferrer" to="https://www.linkedin.com/in/james-g-01466b286/"><Icon><LinkedIn/></Icon></Link>
@@ -57,26 +58,10 @@ export default function AppHeader({current_page}: AppProps) {
         return (
         <div className="hidden min-[800px]:flex flex-row justify-between items-center">
             <div className="flex flex-row justify-start items-start space-x-2">
-                <LinkText containerClassName="p-2" to="/">
-                    <Text type="h3" className={current_page == "Home" ? "underline" : ""}>
-                        James Gaiser
-                    </Text>
-                </LinkText>
-                <LinkText containerClassName="p-2" to="/aboutme">
-                    <Text type="h3" className={current_page == "About Me" ? "underline" : ""}>
-                        About Me
-                    </Text>
-                </LinkText>
-                <LinkText containerClassName="p-2" to="/projects">
-                    <Text type="h3" className={current_page == "Projects" ? "underline" : ""}>
-                        Projects
-                    </Text>
-                </LinkText>
-                <LinkText containerClassName="p-2" to="/contact">
-                    <Text type="h3" className={current_page == "Contact" ? "underline" : ""}>
-                        Contact
-                    </Text>
-                </LinkText>
+                <HeaderLinkText text="James Gaiser" page="Home" current_page={current_page} link="/"/>
+                <HeaderLinkText text="About Me" page="About Me" current_page={current_page} link="/aboutme"/>
+                <HeaderLinkText text="Projects" page="Projects" current_page={current_page} link="/projects"/>
+                <HeaderLinkText text="Contact" page="Contact" current_page={current_page} link="/contact"/>
             </div>
             <div className="flex flex-row items-center space-x-4">
                 <Link target="_blank" rel="noreferrer" to="https://github.com/JamesG9802"><Icon><Github/></Icon></Link>

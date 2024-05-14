@@ -4,8 +4,10 @@ import AppFooter from "components/AppFooter";
 import "App.css";
 import { GenericComponentProps } from "components/Generic";
 
+export type Page = "Home" | "About Me" | "Projects" | "Contact";
+
 export type AppProps = {
-  current_page: "Home" | "About Me" | "Projects" | "Contact"
+  current_page: Page
   hide_header?: boolean
   hide_footer?: boolean
 } & GenericComponentProps;

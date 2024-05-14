@@ -10,6 +10,13 @@ import ChaosTicTacToe from "assets/images/ChaosTicTacToe.png";
 import { ReactNode } from "react";
 import UrRecallsContent from "Screens/ProjectDetails/project_UrRecalls";
 import LanguageResearchContent from "Screens/ProjectDetails/project_LanguageFeatures";
+import ChaosTicTacToeContent from "Screens/ProjectDetails/project_ChaosTTT";
+import FetalHealthContent from "Screens/ProjectDetails/project_FetalMachineLearning";
+import WordleContent from "Screens/ProjectDetails/project_Wordle";
+import HorizonBCBSContent from "Screens/ProjectDetails/project_HCBCBS";
+import TwentyFortyEightContent from "Screens/ProjectDetails/project_2048";
+import VulkanContent from "Screens/ProjectDetails/project_Vulkan";
+import GoogleQuickDrawContent from "Screens/ProjectDetails/project_GoogleQuickDraw";
 
 export type Skill = {
   name: string,
@@ -131,6 +138,12 @@ export const skills: Skill[] = [
     start_year: 2024,
     experience: 3.5,
     image_path: `https://codelabs.developers.google.com/static/your-first-webgpu-app/img/b2dfc2b7faba3c13_856.png`
+  },
+  {
+    name: "AWS",
+    start_year: 2024,
+    experience: 1.5,
+    image_path: `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-original-wordmark.svg`
   }
 ];
 
@@ -163,7 +176,7 @@ export const projects: Project[] = [
     status: "Complete",
     short_description: "An image classifier trained on Google's QuickDraw dataset.",
     technologies: ["Python"],
-    content: "",
+    content: <GoogleQuickDrawContent/>,
   },
   {
     name: "Vulkan 3D Engine Game",
@@ -173,7 +186,7 @@ export const projects: Project[] = [
     status: "Complete",
     short_description: "A farming game where demonstrating the Vulkan 3D graphics API.",
     technologies: ["C", "Vulkan", "TypeScript", "React"],
-    content: "",
+    content: <VulkanContent/>,
   },
   {
     name: "2048 Fastest Lost Research",
@@ -183,7 +196,7 @@ export const projects: Project[] = [
     status: "Work in Progress",
     short_description: "Research into the optimal way to lose a 2048 game.",
     technologies: ["TypeScript", "React"] ,
-    content: "",
+    content: <TwentyFortyEightContent/>,
   },
   {
     name: "Health Plan and System Availability UI",
@@ -193,7 +206,7 @@ export const projects: Project[] = [
     image_path: HorizonBCBS,
     short_description: "Applications for the business users to edit health plans.",
     technologies: ["JavaScript", "Salesforce", "Apex", "Selenium"],
-    content: "",
+    content: <HorizonBCBSContent/>,
   },
   {
     name: "Wordle Information Gain Solver",
@@ -203,7 +216,7 @@ export const projects: Project[] = [
     image_path: Wordle,
     short_description: "A solver for the puzzle game Wordle.",
     technologies: ["JavaScript", "HTML/CSS"],
-    content: "",
+    content: <WordleContent/>,
   },
   {
     name: "Fetal Health Machine Learning",
@@ -213,7 +226,7 @@ export const projects: Project[] = [
     image_path: Fetal,
     short_description: "Developed machine learning models to analyze trends in fetal health.",
     technologies: ["Python"],
-    content: "",
+    content: <FetalHealthContent/>,
   },
   {
     name: "Chaos TicTacToe",
@@ -223,6 +236,6 @@ export const projects: Project[] = [
     image_path: ChaosTicTacToe,
     short_description: "The Tic-Tac-Toe game with 5 spin off variants.",
     technologies: ["Java"],
-    content: "",
+    content: <ChaosTicTacToeContent/>,
   }
 ];

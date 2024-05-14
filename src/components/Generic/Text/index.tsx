@@ -26,7 +26,7 @@ export function Text({type, style, className, text, children}: TextProps) {
             class_styling = "font-bold text-6xl";
             break;
         case "h0":
-            class_styling = "font-bold text-4xl";
+            class_styling = "font-bold text-4xl pb-8";
             break;
         case "h1":
             class_styling = "font-bold text-2xl";

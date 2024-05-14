@@ -10,8 +10,8 @@ export default function Projects() {
   const navigate = useNavigate();
   return (
     <App current_page="Projects">
-      <div className="mt-8 flex flex-col">
-        <div className="self-center w-full max-w-4xl pb-8">
+      <div className="mt-8 flex flex-col overflow-x-hidden">
+        <div className="self-center w-full max-w-4xl">
           <Text type="h0" className="self-start">What I Worked On</Text>
         </div>
         {
@@ -19,12 +19,12 @@ export default function Projects() {
             return (
               <Touchable 
                 key={index}
-                className="Flip Projects_ListItem flex md:flex-row flex-col py-4 my-2 rounded-lg select-none 
+                className="Slide-Left Projects_ListItem flex md:flex-row flex-col py-4 my-2 rounded-lg select-none
                 cursor-pointer
                 bg-l_primary-100 dark:bg-d_primary-100 text-l_onPrimary-100 dark:text-d_onPrimary-100
                 hover:bg-l_primary-100/50 hover:dark:bg-d_primary-100/50" 
                 style={{
-                  animationDelay: index*100 + 100 + "ms"
+                  animationDelay: index * 100 + 100 + "ms"
                 }}
                 onClick={
                   ()=>{

@@ -11,7 +11,7 @@ export type StrongProps = {
  */
 export function Strong({style, className, text, children}: StrongProps) {
     return (
-        <strong style={style} className={"text-base font-bold " + className}>
+        <strong style={style} className={"text-base font-semibold " + className}>
             {text}{children}
         </strong>
     );

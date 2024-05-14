@@ -9,6 +9,7 @@
     font-family: 'Open Sans', 'Roboto';
     @apply bg-l_background-100 dark:bg-d_background-100; 
     @apply text-l_onBackground-100 dark:text-d_onBackground-100;
+    scrollbar-gutter: stable;
 }
 
 /*  The body of the application and containers that mimic the spacing of the body. */
@@ -32,32 +33,66 @@ body, .Body-Container {
 }
 
 a {
-    font-weight: 600;
+    font-weight: bold;
 }
 a:hover {
     text-decoration: underline;
 }
 
-.Flip {
-    -webkit-animation: flip 1s;
-    animation: flip 1s;
+
+.Slide-Up, .Slide-Left {
     animation-fill-mode: forwards;
-    transform: rotateY(90deg);
+    opacity: 0;
+}
+.Slide-Up {
+    -webkit-animation: slideup 1s;
+    animation: slideup 1s;
+    animation-fill-mode: forwards;
+}
+.Slide-Left {
+    -webkit-animation: slideleft 1s;
+    animation: slideleft 1s;
+    animation-fill-mode: forwards;
 }
 
-@-webkit-keyframes flip {
+@-webkit-keyframes slideup {
     from {
-        transform: rotateY(90deg)
+        transform: translate(0,100%);
+        opacity: 0%;
     }
     to {
-        transform: rotateY(0deg)
+        transform: translate(0%, 0%);
+        opacity: 100%;
     }
 }
-@keyframes flip {
+@keyframes slideup {
     from {
-        transform: rotateY(90deg)
+        transform: translate(0%,100%);
+        opacity: 0%;
     }
     to {
-        transform: rotateY(0deg)
+        transform: translate(0%, 0%);
+        opacity: 100%;
+    }
+}
+
+@-webkit-keyframes slideleft {
+    from {
+        transform: translate(100%,0%);
+        opacity: 0%;
+    }
+    to {
+        transform: translate(0%, 0%);
+        opacity: 100%;
+    }
+}
+@keyframes slideleft {
+    from {
+        transform: translate(100%, 0%);
+        opacity: 0%;
+    }
+    to {
+        transform: translate(0%, 0%);
+        opacity: 100%;
     }
 }

@@ -40,7 +40,7 @@ export default function UrRecallsContent() {
     <Text>
     As my final project in my undergraduate studies, I tried to approach this project with the mindset of a professional developer. Compared to my earlier works, I can see how I placed a greater emphasis on <Strong>readability and maintainability</Strong> with more effort put into planning and designing solutions. It is my belief that, while my work may not have been perfect, it will have made the lives of future UrRecalls developers easier.
     </Text>
-    <Text type="h2" className="mt-2">References</Text>
+    <Text type="h1" className="mt-2">References</Text>
     <Text>
       <Link target="_blank" rel="noreferrer" to="https://www.scanavert.com/">
         ScanAvert LLC - https://www.scanavert.com/
