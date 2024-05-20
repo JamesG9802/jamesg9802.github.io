@@ -1,4 +1,4 @@
-import { Mat4, Quat, Vec3, mat3, mat4, vec3 } from "wgpu-matrix";
+import { Mat4, Quat, Vec3, Vec4, mat3, mat4, vec3 } from "wgpu-matrix";
 import { Model } from "simulation/world/model";
 import { Engine } from "simulation/engine";
 import { World } from "simulation/world";
@@ -41,7 +41,7 @@ export class Entity {
     /**
      * Entities may implement on_update for custom update logic.
      */
-    #on_update?: (entity: Entity, mouse_positiob: [number, number], time_delta: number) => void;
+    #on_update?: (entity: Entity, world: World, mouse_position: Vec3, time_delta: number) => void;
 
     /**
      * Creates and returns a new Entity.
@@ -52,7 +52,7 @@ export class Entity {
      * @param on_update
      */
     constructor(position: Vec3, rotation: Quat, scale: Vec3, model: Model, 
-        on_update?: (entity: Entity, mouse_position: [number, number], time_delta: number) => void
+        on_update?: (entity: Entity, world: World, mouse_position: Vec4, time_delta: number) => void
     ) {
         this.model = model;
     
@@ -108,11 +108,11 @@ export class Entity {
      * Updates the entity based on time_delta.
      * @param time_delta 
      */
-    update(mouse_position: [number, number], time_delta: number) {
+    update(world: World, mouse_position: Vec3, time_delta: number) {
     //    this.time += time_delta;
     //    this.position = vec3.fromValues(this.position[0], this.starting_height + Math.cos(this.time), this.position[2]);
         if(this.#on_update)
-            this.#on_update(this, mouse_position, time_delta);
+            this.#on_update(this, world, mouse_position, time_delta);
     }
 
     /**

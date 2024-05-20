@@ -1,6 +1,8 @@
+import { World } from "simulation/world";
 import { Entity } from "simulation/world/entity";
 import { Model } from "simulation/world/model";
 import { Quat, Vec3, quat, vec2, vec3 } from "wgpu-matrix";
+import LinkEntity from "./LinkEntity";
 
 const min_speed = .5;
 const pos_acceleration = 2;
@@ -13,7 +15,7 @@ export default class RingEntity extends Entity {
     static speed: number = min_speed;
     time?: number = 0
     radius?: number = 1
-    static #on_update(entity: RingEntity, _mouse_position: [number, number], time_delta: number) {
+    static #on_update(entity: RingEntity, _world: World, _mouse_position: Vec3, time_delta: number) {
         if(entity.time == undefined)
             entity.time = 0;
         if(entity.radius == undefined)
@@ -33,7 +35,7 @@ export default class RingEntity extends Entity {
             entity.radius * Math.cos(entity.time), 
             entity.radius * Math.sin(entity.time),
             entity.position[2]);
-        
+        vec3.add(entity.position, LinkEntity.get_offset_position(), entity.position);
         quat.rotateX(entity.rotation, RingEntity.speed * time_delta / 5.5, entity.rotation);
         quat.rotateY(entity.rotation, RingEntity.speed * time_delta / 3.5, entity.rotation);
     }

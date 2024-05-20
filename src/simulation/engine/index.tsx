@@ -66,6 +66,22 @@ export class Engine {
             alphaMode: "premultiplied"
         });
         
+        //  Recover gracefully from lost connection
+        device.lost.then((info) => {
+            console.error(`WebGPU device was lost: ${info.message}`);
+            engine.destroy();
+            if(info.reason !== "destroyed")
+                Engine.create(canvas, clear_color)
+                .then((new_engine: Engine | undefined) => {
+                        if(new_engine)    
+                            engine = new_engine;
+                        else {
+                            console.error("Failed to create engine again.");
+                        }
+                    }
+                )
+        })
+
         //  Create the pipeline responsible for rendering models.
         const model_pipeline: ModelPipeline = ModelPipeline.create(device, context, canvasFormat, clear_color);
 

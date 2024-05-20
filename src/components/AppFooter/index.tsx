@@ -27,7 +27,11 @@ export default function AppFooter() {
             <div className="flex flex-row Body-Container-Child justify-center">
                 <Touchable className="px-2 cursor-pointer">
                     <Link target="_blank" rel="noreferrer" to="https://creativecommons.org/licenses/by-sa/4.0/">
-                        <Text className="font-normal">© 2024. CC BY-SA 4.0 License.</Text>
+                        <Text className="font-normal">{`This portfolio © 2024 is licensed under CC BY-SA 4.0 License `}
+                        <img className="inline-flex h-5" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""/>
+                        <img className="inline-flex h-5" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt=""/>
+                        <img className="inline-flex h-5" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1" alt=""/>
+                        </Text>
                     </Link>
                 </Touchable>
             </div>

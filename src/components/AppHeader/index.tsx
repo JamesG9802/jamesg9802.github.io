@@ -19,6 +19,7 @@ type HeaderLinkTextProps = {
 }
 function HeaderLinkText({text, page, link, current_page}: HeaderLinkTextProps) {
     return (
+        //  Something broke
         <div onClick={()=>{window.scrollTo(0, 0)}}>
             <LinkText containerClassName="p-2" to={link}>
                 <Text type="h3" className={page == current_page ? "underline" : "font-semibold"}>

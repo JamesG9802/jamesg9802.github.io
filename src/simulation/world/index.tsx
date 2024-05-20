@@ -1,7 +1,7 @@
 import { Engine } from "simulation/engine";
 import { Camera } from "./camera";
 import { Entity } from "./entity";
-import { Vec4 } from "wgpu-matrix";
+import { Vec2, Vec3, Vec4, mat4, vec3, vec4 } from "wgpu-matrix";
 
 /**
  * A world is the container for all events in the simulation. Entities are contained in the world
@@ -46,9 +46,9 @@ export class World {
      * Updates all entities with the time delta.
      * @param time_delta the number of milliseconds since the last update
      */
-    update(mouse_position: [number, number], time_delta: number) {
+    update(mouse_position: Vec3, time_delta: number) {
         for(let i = 0; i < this.entities.length; i++) {
-            this.entities[i].update(mouse_position, time_delta);
+            this.entities[i].update(this, mouse_position, time_delta);
         }
     }
 
@@ -97,6 +97,35 @@ export class World {
 
     set_global_light_color(engine: Engine, color: Vec4) {
         this.main_camera.set_global_light_color(engine, color);
+    }
+
+    /**
+     * Returns a vector projecting a screen coordinate to the world.
+     * @param screen_coordinates - normalized screen coordinates
+     */
+    screen_to_world(screen_coordinates: Vec2): Vec3 {
+        //  Project the screen coordinates to the world coordinates
+        let near: Vec4 = vec4.create(screen_coordinates[0], screen_coordinates[1], -1, 1);
+
+        let inv_proj_view = mat4.create();
+        mat4.multiply(this.main_camera.projection_matrix, this.main_camera.eye.view_matrix, inv_proj_view);
+        mat4.inverse(inv_proj_view);
+
+        vec4.transformMat4(near, inv_proj_view, near);
+        vec4.divScalar(near, near[3], near);
+        // let inv_proj = mat4.create();
+        // let inv_view = mat4.create();
+
+        // mat4.inverse(this.main_camera.projection_matrix, inv_proj);
+        // mat4.inverse(this.main_camera.eye.view_matrix, inv_view);
+        
+        // vec4.transformMat4(near, inv_proj, near);
+        // near[2] = -1;
+        // near[3] = 0;
+        // vec4.transformMat4(near, inv_view, near);
+
+        let world_position: Vec3 = vec3.create(near[0], near[1], near[2]);
+        return world_position;
     }
 
     destroy() {

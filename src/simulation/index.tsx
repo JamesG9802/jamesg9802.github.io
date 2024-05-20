@@ -1,4 +1,4 @@
-import { Vec4, quat, vec3, vec4 } from "wgpu-matrix";
+import { Vec2, Vec4, quat, vec3, vec4 } from "wgpu-matrix";
 import { Engine } from "./engine";
 import { World } from "./world";
 import { Camera, Eye } from "./world/camera";
@@ -78,8 +78,19 @@ export class Simulation {
             return;
         }
             
-        let camera: Camera = new Camera(engine, new Eye(vec3.fromValues(0, 0, 6), vec3.fromValues(0, 0, 1)),
-        Math.PI / 5, 1, .1, 100, vec4.fromValues(1, 1, 1, 1));
+        let camera: Camera = new Camera(
+            engine, 
+            new Eye(
+                vec3.fromValues(0, 0, -5), 
+                vec3.fromValues(0, 0, -1)
+            ),
+            Math.PI / 5, 
+            1, 
+            .1, 
+            100, 
+            vec4.fromValues(1, 1, 1, 1)
+        );
+
         await Mesh.initialize_dictionary();
         let model1 = await Model.load_from_file(engine, "cube");
         let model2 = await Model.load_from_file(engine, "cliff");
@@ -93,12 +104,12 @@ export class Simulation {
         let entities: Entity[] = [e1];
 
         //  Rings
-        for(let i = 0; i < 12; i++) {
+        for(let i = 0; i < 0; i++) {
             let model = model2.create_instance_copy(engine);
             const radius = .8;
             entities.push(
                 new RingEntity(
-                    vec3.fromValues(radius * Math.sin((i / 12) * 2 * Math.PI), radius * Math.cos((i / 12) * 2 * Math.PI), -1), 
+                    vec3.fromValues(radius * Math.sin((i / 12) * 2 * Math.PI), radius * Math.cos((i / 12) * 2 * Math.PI), 0), 
                     quat.fromEuler(Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, Math.random() * 2 * Math.PI, "xyz"), 
                     vec3.fromValues(.075, .075, .075),
                     model
@@ -110,9 +121,9 @@ export class Simulation {
         for(let i = 0; i < 10; i++) {
             let model = model2.create_instance_copy(engine);
             let entity = new AsteroidEntity(
-                vec3.fromValues(Math.random() * 12 - 6, Math.random() * 12 - 6, 3 * Math.random() - 7), 
+                vec3.fromValues(Math.random() * 12 - 6, Math.random() * 12 - 6, 15 + Math.random() * 5 ), 
                 quat.fromEuler(0, 0, 2 * Math.PI, "xyz"), 
-                vec3.fromValues(.2 * Math.random() + .1, .2 * Math.random() + .1, .2 * Math.random() + .1),
+                vec3.fromValues(.2 * Math.random() + .2, .2 * Math.random() + .2, .2 * Math.random() + .2),
                 model
             );
             entities.push(entity);
@@ -163,10 +174,13 @@ export class Simulation {
     /**
      * Updates the world.
      */
-    update(mouse_position: [number, number]) {
+    update(mouse_position: Vec2) {
         let now = new Date().getTime();
-        let time_delta = (now - this.#last_time)/1000;
+        let time_delta = (now - this.#last_time) / 1000;
+    
         this.world.update(mouse_position, time_delta);
+
+        //  Update timing
         this.#last_time = now;
         
         this.#frame += 1;

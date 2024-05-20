@@ -35,7 +35,7 @@ export type TextPDProps = {
 
 export function TextPD({children}: TextPDProps) {
   return (
-    <Text className="my-3">
+    <Text className="my-5">
       {children}
     </Text>
   );

@@ -175,4 +175,11 @@ export class Camera {
     get projection_bind_group(): GPUBindGroup {
         return this.#projection_bind_group;
     }
+
+    /**
+     * Get the camera's projection matrix.
+     */
+    get projection_matrix(): Mat4 {
+        return this.#projection_matrix;
+    }
 }
