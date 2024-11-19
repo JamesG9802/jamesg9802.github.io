@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body, html {
+    height: 100%;
+}
+
+.light {
+    --color-primary:      rgb(247 147 34);
+    --color-text:         rgb(33 33 33);
+    --color-success:      rgb(0, 200, 81);
+    --color-info:         rgb(51 181 229);
+    --color-warn:         rgb(255 187 51);
+    --color-error:        rgb(254 78 78);
+}
+
+.dark {
+    --color-primary:      rgb(0 0 0);
+    --color-text:         rgb(0 0 0);
+    --color-success:      rgb(0 0 0);
+    --color-info:         rgb(0 0 0);
+    --color-warn:         rgb(0 0 0);
+    --color-error:        rgb(0 0 0);
+}
