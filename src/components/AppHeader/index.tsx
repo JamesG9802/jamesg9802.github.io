@@ -1,83 +1,48 @@
-import { useState } from "react";
-import { Drawer} from "@mui/material";
-import { Text } from "components/Generic/Text";
-
-import Github from "assets/Github";
-import LinkedIn from "assets/LinkedIn";
-import Icon from "components/Generic/Icon";
 import { LinkText } from "components/Generic/Link";
-import MenuIcon from "assets/Menu";
-import { Link } from "react-router-dom";
-import MailObfuscation from "components/Mail";
-import { Page } from "App";
+import { Text, TextProps } from "components/Generic/Text";
+import { useState } from "react";
+import MenuIcon from '@mui/icons-material/Menu';
 
-type HeaderLinkTextProps = {
-    text: string,
-    page: Page,
-    link: string,
-    current_page: Page
-}
-function HeaderLinkText({text, page, link, current_page}: HeaderLinkTextProps) {
+import "./index.css";
+import { Drawer } from "components/Generic/Drawer";
+
+/**
+ * Component for the header links.
+ * @returns 
+ */
+function HeaderLink({children} : TextProps) {
     return (
-        //  Something broke
-        <div onClick={()=>{window.scrollTo(0, 0)}}>
-            <LinkText containerClassName="p-2" to={link}>
-                <Text type="h3" className={page == current_page ? "underline" : "font-semibold"}>
-                    {text}
-                </Text>
-            </LinkText>
-        </div>
-    );
+        <Text type="normal" children={children} className="my-0 mx-4 cursor-pointer font-bold  text-nowrap"/>
+    )
 }
 
-export type AppProps = {
-    current_page: Page
-};
-
-export default function AppHeader({current_page}: AppProps) {
-    function SmallHeader() {
-        const [open, setOpen] = useState(false);
-        return (
-        <div className="flex min-[800px]:hidden flex-col items-center">
-            <div className="flex flex-row items-center">
-                <Icon onClickCapture={(_e) =>{ setOpen(true)}}><MenuIcon/></Icon>
+export default function AppHeader() {
+    const [open, set_open] = useState<boolean>(false);
+    return (
+        <div className="top-0 sticky flex justify-between items-center px-8 py-24 bg-success/50">            
+            <div className="flex flex-1 justify-start items-center mr-8">
+                <Text type="h4" className="cursor-pointer font-bol text-nowrap">
+                    <LinkText to="/">James Gaiser</LinkText>
+                </Text>
             </div>
-            <Drawer open={open} onClose={()=>{setOpen(false)}}>
-                <div className="flex grow flex-col justify-start items-center px-5 Default-Style-Container">
-                    <HeaderLinkText text="James Gaiser" page="Home" current_page={current_page} link="/"/>
-                    <HeaderLinkText text="About Me" page="About Me" current_page={current_page} link="/aboutme"/>
-                    <HeaderLinkText text="Projects" page="Projects" current_page={current_page} link="/projects"/>
-                    <HeaderLinkText text="Contact" page="Contact" current_page={current_page} link="/contact"/>
-                    <div className="flex flex-row justify-between">
-                        <Link target="_blank" rel="noreferrer" to="https://github.com/JamesG9802"><Icon><Github/></Icon></Link>
-                        <Link target="_blank" rel="noreferrer" to="https://www.linkedin.com/in/james-g-01466b286/"><Icon><LinkedIn/></Icon></Link>
-                        <MailObfuscation/>
-                    </div>
+            <div className="hidden sm:flex flex-row" >
+                <HeaderLink><LinkText to="/projects">Projects</LinkText></HeaderLink>
+                <HeaderLink><LinkText to="/contact">Contact</LinkText></HeaderLink>
+            </div>
+            <div className="flex sm:hidden cursor-pointer" onClick={()=>{set_open(!open);}}>
+                {
+                    open ? <MenuIcon/> :
+                    <MenuIcon/> 
+                }
+            </div>
+            <Drawer open={open} onClose={() => { set_open(false); }}>
+                <div className="flex flex-col justify-end items-start text-end 
+                    p-8 mt-4 min-w-56 rounded-sm shadow-md cursor-default scale-up-center space-y-2"
+                >        
+                    <HeaderLink><LinkText to="/projects">Projects</LinkText></HeaderLink>
+                    <HeaderLink><LinkText to="/contact">Contact</LinkText></HeaderLink>
                 </div>
             </Drawer>
-        </div>);
-    }
-    function BigHeader() {
-        return (
-        <div className="hidden min-[800px]:flex flex-row justify-between items-center">
-            <div className="flex flex-row justify-start items-start space-x-2">
-                <HeaderLinkText text="James Gaiser" page="Home" current_page={current_page} link="/"/>
-                <HeaderLinkText text="About Me" page="About Me" current_page={current_page} link="/aboutme"/>
-                <HeaderLinkText text="Projects" page="Projects" current_page={current_page} link="/projects"/>
-                <HeaderLinkText text="Contact" page="Contact" current_page={current_page} link="/contact"/>
-            </div>
-            <div className="flex flex-row items-center space-x-4">
-                <Link target="_blank" rel="noreferrer" to="https://github.com/JamesG9802"><Icon><Github/></Icon></Link>
-                <Link target="_blank" rel="noreferrer" to="https://www.linkedin.com/in/james-g-01466b286/"><Icon><LinkedIn/></Icon></Link>
-                <MailObfuscation/>
-            </div>
-        </div>);
-    }
-    return (
-    <header className="flex-grow-0 p-1 sticky top-0 bg-l_background-100 dark:bg-d_background-100 z-50
-    shadow-[0px_8px_4px_-8px] shadow-l_onBackground-100/25 dark:shadow-d_onBackground-100/25">
-        <SmallHeader/>
-        <BigHeader/>
-    </header>
-    );
+        </div>
+    )
 }
