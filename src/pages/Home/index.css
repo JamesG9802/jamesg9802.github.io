@@ -1,0 +1,25 @@
+@keyframes animateOutline {
+  0% {
+    outline-width: 1px;
+    outline-offset: 0;
+    @apply outline-transparent;
+  }
+
+  10% {
+    @apply outline-secondary/25;
+  }
+
+  /* The animation finishes at 50% */
+  50% {
+    outline-width: 8px;
+    outline-offset: 4px;
+    @apply outline-transparent;
+  }
+
+  100% {
+    outline-width: 7px;
+    outline-offset: 4px;
+    @apply outline-transparent;
+  }
+}
+

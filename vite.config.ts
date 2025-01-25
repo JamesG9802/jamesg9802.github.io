@@ -16,5 +16,5 @@ export default defineConfig({
     environment: 'jsdom',
   },
   base: "/",
-  assetsInclude: "**/*.obj"
+  assetsInclude: ["**/*.md", "**/*.png", "**/*.gif",]
 })

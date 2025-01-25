@@ -19,7 +19,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["@webgpu/types"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
