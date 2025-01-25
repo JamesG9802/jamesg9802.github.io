@@ -1,14 +1,3 @@
 a {
-    color: unset;
-    text-decoration: none;
-}
-
-.page {
-    background: radial-gradient(circle at 19% 28%, rgba(181, 250, 255, 1) 0%, rgba(208, 203, 186, 1) 100%);
-}
-.gradient__text {
-    @apply bg-primary;
-    background-clip: text;
-    -webkit-text-fill-color: text;
-    -webkit-background-clip: transparent;
+    @apply text-primary
 }

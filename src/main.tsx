@@ -1,12 +1,14 @@
+import "./index.css";
+
 import ReactDOM from 'react-dom/client'
+import { StrictMode, useEffect } from 'react';
 import { RouterProvider, createHashRouter } from 'react-router-dom'
-import { CssBaseline, StyledEngineProvider, ThemeProvider, createTheme, useMediaQuery } from '@mui/material'
-import { ErrorFallback, Home } from 'pages';
 
-import "index.css";
-import { useEffect } from 'react';
+import { ErrorFallback, Home, Post, Archive } from 'pages';
 
-const rootElement = document.getElementById("root");
+import { ThemeProvider } from "@material-tailwind/react";
+
+const root_element = document.getElementById("root");
 
 const router = createHashRouter([
     {
@@ -14,76 +16,46 @@ const router = createHashRouter([
         element: <Home/>,
         errorElement: <ErrorFallback/>
     },
+    {
+        path: "/blog/:index",
+        element: <Post/>
+    },
+    {
+        path: "/archives",
+        element: <Archive/>
+    }
 ]);
 
-const darkTheme = createTheme({ 
-    palette: { mode: 'dark' },
-    typography: {
-        fontFamily: [
-            "Open Sans",
-            "Roboto",
-            "Helvetica",
-            "Arial",
-            "sans-serif",
-            "ui-sans-serif",
-            "system-ui",
-            "Apple Color Emoji",
-            "Segoe UI Emoji",
-            "Segoe UI Symbol",
-            "Noto Color Emoji"
-        ].join(',')
-    },
-    //  Make portal elements inject into the root element
-    //  https://mui.com/material-ui/integrations/interoperability/#tailwind-css
-    components: {
-        MuiPopover: {
-            defaultProps: {
-              container: rootElement,
-            },
-          },
-        MuiPopper: {
-            defaultProps: {
-                container: rootElement,
-            },
-        },
-        MuiDialog: {
-            defaultProps: {
-                container: rootElement,
-            },
-        },
-        MuiModal: {
-            defaultProps: {
-                container: rootElement,
-            },
-        },
-    }
-  });
-const lightTheme = createTheme({
-    ...darkTheme, 
-    palette: { mode: 'light' }
-});
-
 function Main() {
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-    const theme = prefersDarkMode ? darkTheme : lightTheme;
-
-    useEffect(() => {
-        rootElement?.classList.add(prefersDarkMode ? "dark" : "light");
-        rootElement?.classList.remove(prefersDarkMode ? "light" : "dark")
-    }, [prefersDarkMode]);
+    function handle_dark_mode(prefers_dark_mode: boolean) {
+        root_element?.classList.add(prefers_dark_mode ? "dark" : "light");
+        root_element?.classList.remove(prefers_dark_mode ? "light" : "dark");
+      }
+    
+      //  Adds an event listener to add a corresponding theme to the root HTML element.
+      useEffect(() => {
+        handle_dark_mode(window.matchMedia("(prefers-color-scheme: dark)").matches);
+    
+        window
+          .matchMedia("(prefers-color-scheme: dark)")
+          .addEventListener("change", event => handle_dark_mode(event.matches));
+    
+        return () => {
+          window
+            .matchMedia("(prefers-color-scheme: dark)")
+            .removeEventListener("change", event => handle_dark_mode(event.matches));
+        }
+      }, []);
 
     return (
-        <>
-            <CssBaseline/>
-            <StyledEngineProvider injectFirst>
-                <ThemeProvider theme={theme}>
-                    <RouterProvider router={router}/>
-                </ThemeProvider>
-            </StyledEngineProvider>
-        </>
+        <ThemeProvider>
+            <RouterProvider router={router}/>
+        </ThemeProvider>
     );
 }
 
-ReactDOM.createRoot(rootElement!).render(
-    <Main/>
+ReactDOM.createRoot(root_element!).render(
+    <StrictMode>
+        <Main/>
+    </StrictMode>
 )
