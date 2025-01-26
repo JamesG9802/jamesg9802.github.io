@@ -104,7 +104,7 @@ export default function Post() {
         if (header.id) observer.unobserve(header);
       });
     };
-  }, [current_header, current_post]);
+  }, [current_header, current_post, hash]);
 
   //  Loads the markdown.
   useEffect(() => {

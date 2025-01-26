@@ -70,6 +70,11 @@ export default function Home() {
               </Text>
             </Button>
           </div>
+          <div className="mx-4 py-4">
+            <Text className="text-justify">
+              This is a collection of <span className="line-through">horrifying</span>, err, <span className="italic">innovative</span> ideas from a programmer. Whenever something strikes my fancy, I'll write about it and share my findings here.
+            </Text>
+          </div>
         </div>
         <AppFooter/>
       </div>
