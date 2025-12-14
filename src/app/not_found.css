@@ -1,0 +1,11 @@
+.Dialogue__Content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-scrollbar-thumb) var(--color-scrollbar-track);
+  scrollbar-gutter: stable;
+}
+
+.Dialogue__Content p {
+  margin-left: 30px;
+  text-indent: -30px;
+  margin-bottom: 12px;
+}
