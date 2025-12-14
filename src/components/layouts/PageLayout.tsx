@@ -1,4 +1,4 @@
-import { Navbar } from "components/Navbar";
+import { Navbar } from "components/NavBar";
 
 /**
  * PageLayout components have the same props as an HTML div element.

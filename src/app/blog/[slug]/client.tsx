@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw";
 import { Post } from "@jamesg9802/blog-store/dist/lib/post";
 
 import "./index.css"
+import Link from "components/Link";
 
 export type BlogPostClientProps = {
   post: Post,
@@ -141,7 +142,7 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
               {
                 previous ?
                   <div className="tooltip" data-tip={previous.title}>
-                    <a href={`/blog/${previous.slug}`} className="btn btn-sm md:btn-md gap-2 lg:gap-3">
+                    <Link href={`/blog/${previous.slug}`} className="btn btn-sm md:btn-md gap-2 lg:gap-3">
                       <div className="flex flex-col min-w-0 max-w-36 max-h-full items-start gap-0.5 leading-[1,1]">
                         <span className="text-base-content/50 hidden text-xs font-semibold tracking-wide md:block">
                           {previous.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -150,14 +151,14 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
                           {previous.title}
                         </span>
                       </div>
-                    </a>
+                    </Link>
                   </div> :
                   <div></div>
               }
               {
                 next ?
                   <div className="tooltip" data-tip={next.title}>
-                    <a href={`/blog/${next.slug}`} className="btn btn-neutral btn-sm md:btn-md gap-2 lg:gap-3">
+                    <Link href={`/blog/${next.slug}`} className="btn btn-neutral btn-sm md:btn-md gap-2 lg:gap-3">
                       <div className="flex flex-col min-w-0 max-w-36 max-h-full items-start gap-0.5 leading-[1,1]">
                         <span className="text-base-content/50 hidden text-xs font-semibold tracking-wide md:block">
                           {next.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -166,7 +167,7 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
                           {next.title}
                         </span>
                       </div>
-                    </a> </div> :
+                    </Link> </div> :
                   <div></div>
               }
             </div>
