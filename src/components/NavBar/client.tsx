@@ -68,7 +68,7 @@ export function NavBarClient({ posts, search_index_unparsed }: NavBarCLientProps
       </div>
       <dialog ref={modal_ref} className="modal">
         <div className="modal-box min-h-[60vh] max-h-[80vh] overflow-y-auto">
-          <label className="input input-ghost w-24 md:w-full focus:outline-none">
+          <label className="input input-ghost w-full focus:outline-none">
             <Icon path={mdiMagnify} size={1} className="opacity-50" />
             <input type="text" value={query} onChange={(e) => { set_query(e.currentTarget.value); }} placeholder="Search" />
             <span> {search_results.length} {search_results.length == 1 ? "results" : "results"}</span>
