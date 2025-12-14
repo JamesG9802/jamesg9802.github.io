@@ -22,6 +22,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: "npm"
+          registry-url: "https://npm.pkg.github.com"
+          always-auth: true
+      - name: Authenticate to GitHub Packages
+        run: npm config set //npm.pkg.github.com/:_authToken=${{ secrets.READ_WRITE_TOKEN }}
 
       - name: Install dependencies
         run: npm ci
