@@ -1,0 +1,13 @@
+.post_markdown table {
+    margin-left: auto;
+    margin-right: auto;
+    width: auto;
+}
+
+img {
+    max-width: 100%;
+}
+
+li {
+    margin-bottom: 0.25rem;
+}

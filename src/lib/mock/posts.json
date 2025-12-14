@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Fake Post 1",
+    "slug": "fake-post-1",
+    "date": "2025-12-12T22:15:46.699Z",
+    "summary": "This is a summary of a post",
+    "tags": [
+      "Science",
+      "Technology"
+    ],
+    "content": "This is a lot of conent."
+  },
+  {
+    "title": "Real Post 1",
+    "slug": "real-post-1",
+    "date": "2025-10-12T22:15:46.699Z",
+    "summary": "This is a summary of a post",
+    "tags": [
+      "Magic",
+      "Tables"
+    ],
+    "content": "This is a small amount of content representing the average sized content for contextual understanding of a myriad number of topics, the least of which concerns the annexation of the fallen nations originating from the breadbasket of a particular country, which is particularly impactful due to reason."
+  },
+  {
+    "title": "Real Post 2",
+    "slug": "real-post-2",
+    "date": "2025-11-12T22:15:46.699Z",
+    "summary": "C#",
+    "tags": [
+      "C#"
+    ],
+    "content": "C#."
+  }
+]
