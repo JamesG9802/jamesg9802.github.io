@@ -11,6 +11,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@giscus/react": "^3.1.0",
     "@jamesg9802/blog-store": "^1.4.0",
     "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",

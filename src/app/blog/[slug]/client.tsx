@@ -4,10 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import Giscus from '@giscus/react';
+
 import { Post } from "@jamesg9802/blog-store/dist/lib/post";
 
 import "./index.css"
 import Link from "components/Link";
+import { SOURCE_REPO__ID, SOURCE_REPO__NAME, SOURCE_REPO__OWNER, SOURCE_REPO_CATEGORY__ID } from "lib/config";
 
 export type BlogPostClientProps = {
   post: Post,
@@ -170,6 +173,22 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
                     </Link> </div> :
                   <div></div>
               }
+            </div>
+            <div>
+              <Giscus
+                id="comments"
+                repo={`${SOURCE_REPO__OWNER}/${SOURCE_REPO__NAME}`}
+                repoId={SOURCE_REPO__ID}
+                category="Announcements"
+                categoryId={SOURCE_REPO_CATEGORY__ID}
+                mapping="pathname"
+                strict="0"
+                reactionsEnabled="1"
+                emitMetadata="0"
+                inputPosition="top"
+                theme="preferred_color_scheme"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
