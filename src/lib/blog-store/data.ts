@@ -2,6 +2,7 @@ import fs from "fs";
 import { Post } from "@jamesg9802/blog-store/dist/lib/post";
 import { get_all_blog_posts } from "@jamesg9802/blog-store/dist/post";
 import path from "path";
+import { DATA_REPO__NAME, DATA_REPO__OWNER } from "lib/config";
 
 
 let get_all_posts_static_singleton: Promise<Post[]> | undefined;
@@ -28,7 +29,7 @@ export async function get_all_posts_static(): Promise<Post[]> {
     }
 
     if (!fs.existsSync("_cache/posts.json")) {
-      const posts: Post[] = await get_all_blog_posts("jamesg9802", "blog-store");
+      const posts: Post[] = await get_all_blog_posts(DATA_REPO__OWNER, DATA_REPO__NAME);
       console.info("Storing posts in cache.");
       fs.writeFileSync("_cache/posts.json", JSON.stringify(posts));
       return posts;
@@ -50,7 +51,7 @@ export async function get_all_posts_static(): Promise<Post[]> {
 
   if (!get_all_posts_static_singleton) {
     console.info("Fetching all posts.");
-    get_all_posts_static_singleton = get_all_blog_posts("jamesg9802", "blog-store")
+    get_all_posts_static_singleton = get_all_blog_posts(DATA_REPO__OWNER, DATA_REPO__NAME)
   }
   return get_all_posts_static_singleton;
 }
