@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import PageLayout from "components/layouts/PageLayout";
 
-import { ViewTransition } from 'react';
+// import { ViewTransition } from 'react';
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,16 +16,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransition>
-      <html lang="en">
-        <body
-          className={`antialiased`}
-        >
-          <PageLayout>
-            {children}
-          </PageLayout>
-        </body>
-      </html>
-    </ViewTransition>
+    // <ViewTransition>
+    <html lang="en">
+      <body
+        className={`antialiased`}
+      >
+        <PageLayout>
+          {children}
+        </PageLayout>
+      </body>
+    </html>
+    // </ViewTransition>
   );
 }
