@@ -126,11 +126,11 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
                 components={{
-                  h1(props) { return <h1 id={props.children?.toString()} className={props.className}>{props.children}</h1> },
-                  h2(props) { return <h2 id={props.children?.toString()} className={props.className}>{props.children}</h2> },
-                  h3(props) { return <h3 id={props.children?.toString()} className={props.className}>{props.children}</h3> },
-                  h4(props) { return <h4 id={props.children?.toString()} className={props.className}>{props.children}</h4> },
-                  h5(props) { return <h5 id={props.children?.toString()} className={props.className}>{props.children}</h5> },
+                  // h1(props) { return <h1 id={props.children?.toString()} className={props.className}>{props.children}</h1> },
+                  // h2(props) { return <h2 id={props.children?.toString()} className={props.className}>{props.children}</h2> },
+                  // h3(props) { return <h3 id={props.children?.toString()} className={props.className}>{props.children}</h3> },
+                  // h4(props) { return <h4 id={props.children?.toString()} className={props.className}>{props.children}</h4> },
+                  // h5(props) { return <h5 id={props.children?.toString()} className={props.className}>{props.children}</h5> },
                   blockquote(props) {
                     return <div className="mx-4 px-4 border-solid border-0 border-l-2 border-outline brightness-110 dark:brightness-90">
                       {props.children}

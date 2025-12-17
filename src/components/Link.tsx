@@ -1,4 +1,4 @@
-import { Link as NextLink } from "next-view-transitions";
+import { Link as NextLink } from "@jamesg9802/next-view-transitions";
 import { ComponentProps } from "react";
 
 export type LinkProps = ComponentProps<typeof NextLink>;

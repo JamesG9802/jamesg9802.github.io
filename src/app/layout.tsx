@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import PageLayout from "components/layouts/PageLayout";
-import { ViewTransitions } from 'next-view-transitions'
+import { ViewTransitions } from '@jamesg9802/next-view-transitions'
 
 import "./globals.css";
 
@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransitions>
+    <ViewTransitions enableHashTransitions>
       <html lang="en">
         <body
           className={`antialiased`}
