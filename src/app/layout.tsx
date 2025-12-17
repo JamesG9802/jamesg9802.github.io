@@ -4,6 +4,7 @@ import PageLayout from "components/layouts/PageLayout";
 import { ViewTransitions } from '@jamesg9802/next-view-transitions'
 
 import "./globals.css";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Sink",
@@ -16,17 +17,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransitions enableHashTransitions>
-      <html lang="en">
-        <body
-          className={`antialiased`}
-        >
-          <PageLayout>
-            {children}
-          </PageLayout>
-        </body>
-      </html>
-    </ViewTransitions>
-
+    <Suspense>
+      <ViewTransitions enableHashTransitions>
+        <html lang="en">
+          <body
+            className={`antialiased`}
+          >
+            <PageLayout>
+              {children}
+            </PageLayout>
+          </body>
+        </html>
+      </ViewTransitions>
+    </Suspense>
   );
 }
