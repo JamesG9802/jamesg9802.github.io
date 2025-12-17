@@ -13,7 +13,6 @@
   "dependencies": {
     "@giscus/react": "^3.1.0",
     "@jamesg9802/blog-store": "^1.4.0",
-    "@jamesg9802/next-view-transitions": "^0.0.1",
     "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",
     "daisyui": "^5.5.11",
@@ -21,7 +20,6 @@
     "loglevel": "^1.9.2",
     "minisearch": "^7.2.0",
     "next": "^16.0.8",
-    "next-view-transitions": "^0.3.5",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-icons": "^5.5.0",
