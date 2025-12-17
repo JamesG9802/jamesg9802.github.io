@@ -108,9 +108,9 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
 
       {/* Article */}
       <div className="mx-auto w-full max-w-screen-sm xl:max-w-3xl min-h-screen flex flex-col">
-        <div className="bg-base-100 shadow-black/50 shadow-md my-8 pb-4 px-4 flex-1 flex flex-col rounded-md">
+        <div className="bg-base-100 shadow-md my-8 px-4 sm:px-16 flex-1 flex flex-col rounded-md">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold w-full pt-6 pb-2 border-solid border-0 border-b-2 border-outline">
+            <h1 className="text-4xl font-bold w-full pt-12 pb-2 border-solid border-0 border-b-2 border-outline">
               {post.title}
             </h1>
             {// Date and Author
@@ -121,7 +121,7 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
                 "James Gaiser"
               }
             </p>
-            <article ref={prose_ref} className="post_markdown pt-8 w-full prose max-w-none">
+            <article ref={prose_ref} className="post_markdown pt-8 w-full prose prose-h1:font-bold prose-h1:text-3xl max-w-none">
               <Markdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
@@ -141,7 +141,7 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
                 {post.content}
               </Markdown>
             </article>
-            <div className="flex justify-between">
+            <div className="flex justify-between py-4">
               {
                 previous ?
                   <div className="tooltip" data-tip={previous.title}>
@@ -174,7 +174,7 @@ export default function BlogPostClient({ post, previous, next }: BlogPostClientP
                   <div></div>
               }
             </div>
-            <div>
+            <div className="py-4">
               <Giscus
                 id="comments"
                 repo={`${SOURCE_REPO__OWNER}/${SOURCE_REPO__NAME}`}
